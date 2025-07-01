@@ -16,8 +16,7 @@ function M.start()
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
   local cur_win = vim.api.nvim_get_current_win()
   vim.api.nvim_set_current_buf(buf)
-  M.state.job_id = vim.fn.jobstart(args, {
-    pty = true,
+  M.state.job_id = vim.fn.termopen(args, {
     cwd = vim.fn.getcwd(),
     on_exit = function() M.state.job_id = nil end,
   })
