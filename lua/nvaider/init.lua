@@ -94,7 +94,8 @@ function M.toggle()
     vim.api.nvim_win_close(M.state.win_id, true)
     M.state.win_id = nil
   else
-    open_window(false)
+  local current_win = open_window(false)
+  vim.api.nvim_set_current_win(current_win)
   end
 end
 

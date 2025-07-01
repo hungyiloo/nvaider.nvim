@@ -1,6 +1,6 @@
 # nvaider
 
-A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a floating terminal and a single `:Aider` command with subcommands.
+A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands.
 
 ## Installation
 
@@ -35,9 +35,11 @@ Available subcommands:
 - `toggle`  
   Toggles a side window displaying aider terminal.  
 - `show`  
-  Opens a side window displaying aider terminal, without switching windows.  
+  Opens a side window displaying aider terminal.  
 - `hide`  
-  Closes the floating window displaying aider terminal.  
+  Closes the side window displaying aider terminal.  
+- `focus`  
+  Opens the side window displaying aider terminal and enters input mode.  
 - `add`  
   Sends `/add <current-file-path>` to aider.  
 - `drop`  
