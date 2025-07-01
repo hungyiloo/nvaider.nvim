@@ -20,6 +20,20 @@ local function ensure_running()
   return true
 end
 
+local function open_window(enter_insert)
+  local current_win = vim.api.nvim_get_current_win()
+  vim.cmd('rightbelow vsplit')
+  M.state.win_id = vim.api.nvim_get_current_win()
+  vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
+  vim.api.nvim_win_set_option(M.state.win_id, 'number', false)
+  vim.api.nvim_win_set_option(M.state.win_id, 'relativenumber', false)
+  local win_width = math.floor(vim.o.columns * 0.35)
+  vim.api.nvim_win_set_width(M.state.win_id, win_width)
+  vim.api.nvim_buf_set_keymap(M.state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
+  if enter_insert then vim.cmd('startinsert') end
+  return current_win
+end
+
 function M.start()
   if M.state.job_id then return end
   local buf = vim.api.nvim_create_buf(false, true)
@@ -57,18 +71,7 @@ function M.toggle()
     vim.api.nvim_win_close(M.state.win_id, true)
     M.state.win_id = nil
   else
-    -- open a side window for the aider terminal
-    vim.cmd('rightbelow vsplit')
-    M.state.win_id = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
-    -- disable line numbers in the aider window
-    vim.api.nvim_win_set_option(M.state.win_id, 'number', false)
-    vim.api.nvim_win_set_option(M.state.win_id, 'relativenumber', false)
-    local win_width = math.floor(vim.o.columns * 0.35)
-    vim.api.nvim_win_set_width(M.state.win_id, win_width)
-    -- allow <Esc> to exit terminal mode
-    vim.api.nvim_buf_set_keymap(M.state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
-    vim.cmd('startinsert')
+    local current_win = open_window(true)
   end
 end
 
