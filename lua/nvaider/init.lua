@@ -38,26 +38,10 @@ function M.start()
   if M.state.job_id then return end
   local buf = vim.api.nvim_create_buf(false, true)
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
+  vim.api.nvim_buf_call(buf, function()
     M.state.job_id = vim.fn.jobstart(args, {
-      stdout_buffered = false,
-      stderr_buffered = false,
+      term = true,
       cwd = vim.fn.getcwd(),
-      on_stdout = function(_, data, _)
-        if data then
-          vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
-          if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-            vim.api.nvim_win_set_cursor(M.state.win_id, { vim.api.nvim_buf_line_count(buf), 0 })
-          end
-        end
-      end,
-      on_stderr = function(_, data, _)
-        if data then
-          vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
-          if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-            vim.api.nvim_win_set_cursor(M.state.win_id, { vim.api.nvim_buf_line_count(buf), 0 })
-          end
-        end
-      end,
       on_exit = function()
         M.state.job_id = nil
         if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
@@ -67,6 +51,7 @@ function M.start()
       end,
     })
     vim.notify("Aider Started")
+  end)
   M.state.buf_nr = buf
 end
 
