@@ -73,7 +73,7 @@ function M.start()
         M.state.win_id = nil
       end,
     })
-    vim.notify("Aider Started")
+    vim.notify("Aider Started", vim.log.levels.INFO)
   end)
   M.state.buf_nr = buf
 end
