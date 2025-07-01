@@ -13,12 +13,11 @@ local M = {
 function M.start()
   if M.state.job_id then return end
   local buf = vim.api.nvim_create_buf(false, true)
-  -- ai: vim.tbl_flatten is deprecated
-  local args = vim.tbl_flatten({ M.config.cmd, M.config.args })
+  local args = vim.list_extend({ M.config.cmd }, M.config.args)
   local cur_win = vim.api.nvim_get_current_win()
   vim.api.nvim_set_current_buf(buf)
-  -- ai: vim.fn.termopen is deprecated. ai!
-  M.state.job_id = vim.fn.termopen(args, {
+  M.state.job_id = vim.fn.jobstart(args, {
+    pty = true,
     cwd = vim.fn.getcwd(),
     on_exit = function() M.state.job_id = nil end,
   })
