@@ -7,7 +7,7 @@ local M = {
     job_id = nil,
     buf_nr = nil,
     win_id = nil,
-    --- @type uv_timer_t?
+    --- @type uv.uv_timer_t?
     check_timer = nil,
   },
 }
@@ -56,7 +56,7 @@ function M.start()
           M.state.check_timer:stop()
           M.state.check_timer:close()
         end
-        M.state.check_timer = vim.loop.new_timer()
+        M.state.check_timer = vim.uv.new_timer()
         M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
           vim.cmd('silent! checktime')
           -- clean up
