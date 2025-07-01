@@ -44,6 +44,8 @@ function M.start()
       cwd = vim.fn.getcwd(),
       on_stdout = function(_, _, _)
         if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+          -- ai: when I type in the aider terminal window, this line throws an error "Can't re-enter normal mode from terminal mode".
+          -- I think this logic may need to be disabled when the terminal window has focus, but allowed to executed if the window does not have focus. Can we do that? ai!
           vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
         end
       end,
