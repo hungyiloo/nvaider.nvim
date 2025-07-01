@@ -41,19 +41,12 @@ function M.toggle()
     vim.api.nvim_win_close(M.state.win_id, true)
     M.state.win_id = nil
   else
-    -- I would prefer a side window rather than a floating window, so I can keep an eye on aider while also seeing the code. ai!
-    local width = math.floor(vim.o.columns * 0.8)
-    local height = math.floor(vim.o.lines * 0.8)
-    local row = math.floor((vim.o.lines - height) / 2)
-    local col = math.floor((vim.o.columns - width) / 2)
-    M.state.win_id = vim.api.nvim_open_win(M.state.buf_nr, true, {
-      relative = 'editor',
-      width = width,
-      height = height,
-      row = row,
-      col = col,
-      style = 'minimal',
-    })
+    -- open a side window for the aider terminal
+    vim.cmd('rightbelow vsplit')
+    M.state.win_id = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
+    local win_width = math.floor(vim.o.columns * 0.3)
+    vim.api.nvim_win_set_width(M.state.win_id, win_width)
   end
 end
 
