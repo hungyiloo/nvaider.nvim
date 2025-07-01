@@ -161,6 +161,16 @@ function M.hide()
   end
 end
 
+function M.focus()
+  if not ensure_running() then return end
+  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+    vim.api.nvim_set_current_win(M.state.win_id)
+    vim.cmd('startinsert')
+  else
+    open_window(true)
+  end
+end
+
 function M.setup(opts)
   M.config = vim.tbl_extend('force', M.config, opts or {})
   if M._initialized then return end
@@ -192,6 +202,8 @@ function M.setup(opts)
       M.ask(txt)
     elseif sub == 'show' then
       M.show()
+    elseif sub == 'focus' then
+      M.focus()
     elseif sub == 'hide' then
       M.hide()
     else
@@ -200,7 +212,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send', 'ask', 'show', 'hide' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
