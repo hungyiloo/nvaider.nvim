@@ -78,6 +78,10 @@ function M.dropall()
   M.send("/drop")
 end
 
+function M.reset()
+  M.send("/reset")
+end
+
 function M.setup(opts)
   M.config = vim.tbl_extend('force', M.config, opts or {})
   if M._initialized then return end
@@ -97,6 +101,8 @@ function M.setup(opts)
       M.drop()
     elseif sub == 'dropall' then
       M.dropall()
+    elseif sub == 'reset' then
+      M.reset()
     elseif sub == 'send' then
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
@@ -107,7 +113,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'send' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
