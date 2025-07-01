@@ -41,6 +41,7 @@ function M.toggle()
     vim.api.nvim_win_close(M.state.win_id, true)
     M.state.win_id = nil
   else
+    -- I would prefer a side window rather than a floating window, so I can keep an eye on aider while also seeing the code. ai!
     local width = math.floor(vim.o.columns * 0.8)
     local height = math.floor(vim.o.lines * 0.8)
     local row = math.floor((vim.o.lines - height) / 2)
