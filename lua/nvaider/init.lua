@@ -7,6 +7,7 @@ local M = {
     job_id = nil,
     buf_nr = nil,
     win_id = nil,
+    -- ai: add a type annotation to this field to fix "undefined field" warnings elsewhere in the code. ai!
     check_timer = nil,
   },
 }
