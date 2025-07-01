@@ -12,6 +12,7 @@ local M = {
 
 -- ensure the aider process is running
 local function ensure_running()
+  M.start()
   if not M.state.job_id then
     vim.notify("Aider is not running", vim.log.levels.ERROR)
     return false
