@@ -14,14 +14,12 @@ function M.start()
   if M.state.job_id then return end
   local buf = vim.api.nvim_create_buf(false, true)
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
-  local cur_win = vim.api.nvim_get_current_win()
-  vim.api.nvim_set_current_buf(buf)
-  M.state.job_id = vim.fn.jobstart(args, {
-    term = true,
-    cwd = vim.fn.getcwd(),
-    on_exit = function() M.state.job_id = nil end,
-  })
-  vim.api.nvim_set_current_win(cur_win)
+  vim.api.nvim_buf_call(buf, function()
+    M.state.job_id = vim.fn.termopen(args, {
+      cwd = vim.fn.getcwd(),
+      on_exit = function() M.state.job_id = nil end,
+    })
+  end)
   M.state.buf_nr = buf
 end
 
