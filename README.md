@@ -14,7 +14,7 @@ require("lazy").setup({
       -- The aider binary or command to run
       cmd = "aider",
       -- Additional arguments passed to the aider CLI
-      args = { "--watch-files" },
+      args = { "--model", "o4-mini", "--watch-files" },
     },
   },
 })
@@ -29,23 +29,23 @@ The plugin defines a single user command:
 Available subcommands:
 
 - `start`  
-  Starts the helper in a hidden terminal buffer.  
+  Starts aider in a hidden terminal buffer (use with aider's [`--watch-files`](https://aider.chat/docs/usage/watch.html)).  
 - `stop`  
-  Stops the helper process and closes any open window.  
+  Stops aider process and closes any open window.  
 - `toggle`  
-  Toggles a centered floating window displaying the helper terminal.  
+  Toggles a side window displaying aider terminal.  
 - `show`  
-  Opens a centered floating window displaying the helper terminal.  
+  Opens a side window displaying aider terminal, without switching windows.  
 - `hide`  
-  Closes the floating window displaying the helper terminal.  
+  Closes the floating window displaying aider terminal.  
 - `add`  
-  Sends `add <current-file-path>` to the helper.  
+  Sends `/add <current-file-path>` to aider.  
 - `drop`  
-  Sends `drop <current-file-path>` to the helper.  
+  Sends `/drop <current-file-path>` to aider.  
 - `dropall`  
-  Sends `dropall` to the helper, removing all tracked files.  
+  Sends `/drop` to aider, removing all tracked files.  
 - `reset`  
-  Sends `reset` to the helper, clearing all state.  
+  Sends `/reset` to aider, clearing all state.  
 - `send [text]`  
   Sends arbitrary text. If no text is provided, prompts you for input.
 
@@ -55,7 +55,7 @@ Tab completion for subcommands is available when typing `:Aider ` and pressing `
 
 | Option | Type   | Default        | Description                                 |
 | ------ | ------ | -------------- | ------------------------------------------- |
-| `cmd`  | string | `"aider"`      | The command or executable for the helper.   |
+| `cmd`  | string | `"aider"`      | The command or executable for aider.   |
 | `args` | list   | `{} `          | List of extra CLI arguments to pass on start.|
 
 You can override these in your `lazy.nvim` setup under the `opts` table.
