@@ -9,7 +9,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 require("lazy").setup({
   {
-    "your-username/nvaider",
+    "hungyiloo/nvaider.nvim",
     opts = {
       -- The aider binary or command to run
       cmd = "aider",
