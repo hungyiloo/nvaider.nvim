@@ -163,7 +163,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send', 'show', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
