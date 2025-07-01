@@ -40,10 +40,12 @@ function M.toggle()
     M.state.win_id = nil
   else
     -- open a side window for the aider terminal
+    -- ai: don't show line numbers in this window.
+    -- ai: also, i'm unable to press esc to get out of input mode in this terminal. can you fix this? ai!
     vim.cmd('rightbelow vsplit')
     M.state.win_id = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
-    local win_width = math.floor(vim.o.columns * 0.3)
+    local win_width = math.floor(vim.o.columns * 0.35)
     vim.api.nvim_win_set_width(M.state.win_id, win_width)
     vim.cmd('startinsert')
   end
