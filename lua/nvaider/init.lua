@@ -57,7 +57,10 @@ function M.toggle()
 end
 
 function M.send(text)
-  if not M.state.job_id then M.start() end
+  if not M.state.job_id then
+    vim.notify("Aider is not running", vim.log.levels.ERROR)
+    return
+  end
   if text == '' then
     text = vim.fn.input('Aider> ')
   end
