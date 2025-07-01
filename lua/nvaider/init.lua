@@ -7,6 +7,7 @@ local M = {
     job_id = nil,
     buf_nr = nil,
     win_id = nil,
+    check_timer = nil,
   },
 }
 
@@ -48,6 +49,20 @@ function M.start()
             vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
           end
         end
+
+        -- debounce checktime
+        if M.state.check_timer then
+          M.state.check_timer:stop()
+          M.state.check_timer:close()
+        end
+        M.state.check_timer = vim.loop.new_timer()
+        M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
+          vim.cmd('silent! checktime')
+          -- clean up
+          M.state.check_timer:stop()
+          M.state.check_timer:close()
+          M.state.check_timer = nil
+        end))
       end,
       on_exit = function()
         M.state.job_id = nil
