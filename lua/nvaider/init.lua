@@ -99,9 +99,9 @@ function M.setup(opts)
     end
   end, {
     nargs = '*',
-    complete = function(_, line)
+    complete = function(argLead, cmdLine, cursorPos)
       local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'send' }
-      return vim.tbl_filter(function(item) return item:match('^' .. line) end, subs)
+      return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
 end
