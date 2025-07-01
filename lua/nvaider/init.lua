@@ -16,7 +16,7 @@ local M = {
 local function ensure_running()
   M.start()
   if not M.state.job_id then
-    vim.notify("Aider is not running", vim.log.levels.ERROR)
+    vim.notify("Aider is not running", vim.log.levels.ERROR, { title = "nvaider" })
     return false
   end
   return true
@@ -73,7 +73,7 @@ function M.start()
         M.state.win_id = nil
       end,
     })
-    vim.notify("Aider Started", vim.log.levels.INFO)
+    vim.notify("Aider Started", vim.log.levels.INFO, { title = "nvaider" })
   end)
   M.state.buf_nr = buf
 end
@@ -126,20 +126,20 @@ function M.add()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/add " .. file)
-  vim.notify("Added file: " .. file, vim.log.levels.INFO)
+  vim.notify("Added file: " .. file, vim.log.levels.INFO, { title = "nvaider" })
 end
 
 function M.drop()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/drop " .. file)
-  vim.notify("Dropped file: " .. file, vim.log.levels.INFO)
+  vim.notify("Dropped file: " .. file, vim.log.levels.INFO, { title = "nvaider" })
 end
 
 function M.dropall()
   if not ensure_running() then return end
   M.send("/drop")
-  vim.notify("All files dropped", vim.log.levels.INFO)
+  vim.notify("All files dropped", vim.log.levels.INFO, { title = "nvaider" })
 end
 
 function M.reset()
@@ -195,7 +195,7 @@ function M.setup(opts)
     elseif sub == 'hide' then
       M.hide()
     else
-      vim.notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR)
+      vim.notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR, { title = "nvaider" })
     end
   end, {
     nargs = '*',
