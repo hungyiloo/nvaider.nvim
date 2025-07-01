@@ -27,7 +27,13 @@ function M.start()
     M.state.job_id = vim.fn.jobstart(args, {
       term = true,
       cwd = vim.fn.getcwd(),
-      on_exit = function() M.state.job_id = nil end,
+      on_exit = function()
+        M.state.job_id = nil
+        if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+          vim.api.nvim_win_close(M.state.win_id, true)
+        end
+        M.state.win_id = nil
+      end,
     })
     vim.notify("Aider Started")
   end)
