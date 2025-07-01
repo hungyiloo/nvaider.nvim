@@ -15,10 +15,12 @@ function M.start()
   local buf = vim.api.nvim_create_buf(false, true)
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
   vim.api.nvim_buf_call(buf, function()
-    M.state.job_id = vim.fn.termopen(args, {
+    M.state.job_id = vim.fn.jobstart(args, {
+      term = true,
       cwd = vim.fn.getcwd(),
       on_exit = function() M.state.job_id = nil end,
     })
+    vim.notify("Aider Started")
   end)
   M.state.buf_nr = buf
 end
@@ -64,12 +66,12 @@ end
 
 function M.add()
   local file = vim.fn.expand('%:p')
-  M.send("add " .. file)
+  M.send("/add " .. file)
 end
 
 function M.drop()
   local file = vim.fn.expand('%:p')
-  M.send("drop " .. file)
+  M.send("/drop " .. file)
 end
 
 function M.setup(opts)
