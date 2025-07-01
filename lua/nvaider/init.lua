@@ -40,12 +40,12 @@ function M.toggle()
     M.state.win_id = nil
   else
     -- open a side window for the aider terminal
-    -- ai: automatically enter insert mode when switching to this window. ai!
     vim.cmd('rightbelow vsplit')
     M.state.win_id = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
     local win_width = math.floor(vim.o.columns * 0.3)
     vim.api.nvim_win_set_width(M.state.win_id, win_width)
+    vim.cmd('startinsert')
   end
 end
 
