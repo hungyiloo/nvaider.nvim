@@ -106,6 +106,28 @@ function M.reset()
   M.send("/reset")
 end
 
+function M.show()
+  if not ensure_running() then return end
+  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then return end
+  local current_win = vim.api.nvim_get_current_win()
+  vim.cmd('rightbelow vsplit')
+  M.state.win_id = vim.api.nvim_get_current_win()
+  vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
+  vim.api.nvim_win_set_option(M.state.win_id, 'number', false)
+  vim.api.nvim_win_set_option(M.state.win_id, 'relativenumber', false)
+  local win_width = math.floor(vim.o.columns * 0.35)
+  vim.api.nvim_win_set_width(M.state.win_id, win_width)
+  vim.api.nvim_buf_set_keymap(M.state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
+  vim.api.nvim_set_current_win(current_win)
+end
+
+function M.hide()
+  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+    vim.api.nvim_win_close(M.state.win_id, true)
+    M.state.win_id = nil
+  end
+end
+
 function M.setup(opts)
   M.config = vim.tbl_extend('force', M.config, opts or {})
   if M._initialized then return end
@@ -131,6 +153,10 @@ function M.setup(opts)
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
       M.send(txt)
+    elseif sub == 'show' then
+      M.show()
+    elseif sub == 'hide' then
+      M.hide()
     else
       vim.notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR)
     end
