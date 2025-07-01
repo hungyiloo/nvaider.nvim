@@ -27,6 +27,7 @@ local function open_window(enter_insert)
   vim.cmd('rightbelow vsplit')
   M.state.win_id = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
+  -- fix the deprecated function calls to nvim_win_set_option in the next couple of lines. use nvim_set_option_value instead. ai!
   vim.api.nvim_win_set_option(M.state.win_id, 'number', false)
   vim.api.nvim_win_set_option(M.state.win_id, 'relativenumber', false)
   local win_width = math.floor(vim.o.columns * 0.35)
@@ -73,7 +74,7 @@ function M.start()
         M.state.win_id = nil
       end,
     })
-    vim.notify("Aider Started", vim.log.levels.INFO, { title = "nvaider" })
+    vim.notify("Started aider", vim.log.levels.INFO, { title = "nvaider" })
   end)
   M.state.buf_nr = buf
 end
