@@ -42,6 +42,11 @@ function M.start()
     M.state.job_id = vim.fn.jobstart(args, {
       term = true,
       cwd = vim.fn.getcwd(),
+      on_stdout = function(_, _, _)
+        if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+          vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
+        end
+      end,
       on_exit = function()
         M.state.job_id = nil
         if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
