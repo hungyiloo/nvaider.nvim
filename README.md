@@ -33,11 +33,19 @@ Available subcommands:
 - `stop`  
   Stops the helper process and closes any open window.  
 - `toggle`  
-  Opens or closes a centered floating window displaying the helper terminal.  
+  Toggles a centered floating window displaying the helper terminal.  
+- `show`  
+  Opens a centered floating window displaying the helper terminal.  
+- `hide`  
+  Closes the floating window displaying the helper terminal.  
 - `add`  
   Sends `add <current-file-path>` to the helper.  
 - `drop`  
   Sends `drop <current-file-path>` to the helper.  
+- `dropall`  
+  Sends `dropall` to the helper, removing all tracked files.  
+- `reset`  
+  Sends `reset` to the helper, clearing all state.  
 - `send [text]`  
   Sends arbitrary text. If no text is provided, prompts you for input.
 
