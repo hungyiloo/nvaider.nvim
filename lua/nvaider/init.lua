@@ -94,6 +94,18 @@ function M.send(text)
   vim.fn.chansend(M.state.job_id, text .. '\n')
 end
 
+function M.ask(text)
+  if not ensure_running() then return end
+  if text == '' then
+    vim.ui.input({ prompt = 'Aider> ' }, function(input)
+      if not input or input == '' then return end
+      vim.fn.chansend(M.state.job_id, '/ask ' .. input .. '\n')
+    end)
+    return
+  end
+  vim.fn.chansend(M.state.job_id, '/ask ' .. text .. '\n')
+end
+
 function M.add()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
@@ -155,6 +167,10 @@ function M.setup(opts)
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
       M.send(txt)
+    elseif sub == 'ask' then
+      table.remove(args, 1)
+      local txt = table.concat(args, ' ')
+      M.ask(txt)
     elseif sub == 'show' then
       M.show()
     elseif sub == 'hide' then
@@ -165,7 +181,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send', 'show', 'hide' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send', 'ask', 'show', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
