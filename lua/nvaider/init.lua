@@ -10,6 +10,15 @@ local M = {
   },
 }
 
+-- ensure the aider process is running
+local function ensure_running()
+  if not M.state.job_id then
+    vim.notify("Aider is not running", vim.log.levels.ERROR)
+    return false
+  end
+  return true
+end
+
 function M.start()
   if M.state.job_id then return end
   local buf = vim.api.nvim_create_buf(false, true)
@@ -57,10 +66,7 @@ function M.toggle()
 end
 
 function M.send(text)
-  if not M.state.job_id then
-    vim.notify("Aider is not running", vim.log.levels.ERROR)
-    return
-  end
+  if not ensure_running() then return end
   if text == '' then
     text = vim.fn.input('Aider> ')
   end
@@ -68,20 +74,24 @@ function M.send(text)
 end
 
 function M.add()
+  if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/add " .. file)
 end
 
 function M.drop()
+  if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/drop " .. file)
 end
 
 function M.dropall()
+  if not ensure_running() then return end
   M.send("/drop")
 end
 
 function M.reset()
+  if not ensure_running() then return end
   M.send("/reset")
 end
 
