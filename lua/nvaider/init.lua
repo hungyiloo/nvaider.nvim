@@ -74,6 +74,10 @@ function M.drop()
   M.send("/drop " .. file)
 end
 
+function M.dropall()
+  M.send("/drop")
+end
+
 function M.setup(opts)
   M.config = vim.tbl_extend('force', M.config, opts or {})
   if M._initialized then return end
@@ -91,6 +95,8 @@ function M.setup(opts)
       M.add()
     elseif sub == 'drop' then
       M.drop()
+    elseif sub == 'dropall' then
+      M.dropall()
     elseif sub == 'send' then
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
@@ -101,7 +107,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'send' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'send' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
