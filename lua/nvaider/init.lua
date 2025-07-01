@@ -85,7 +85,7 @@ end
 function M.send(text)
   if not ensure_running() then return end
   if text == '' then
-    vim.ui.input({ prompt = 'Aider> ' }, function(input)
+    vim.ui.input({ prompt = 'aider> ' }, function(input)
       if not input or input == '' then return end
       vim.fn.chansend(M.state.job_id, input .. '\n')
     end)
@@ -97,7 +97,7 @@ end
 function M.ask(text)
   if not ensure_running() then return end
   if text == '' then
-    vim.ui.input({ prompt = 'Aider> ' }, function(input)
+    vim.ui.input({ prompt = 'ask aider> ' }, function(input)
       if not input or input == '' then return end
       vim.fn.chansend(M.state.job_id, '/ask ' .. input .. '\n')
     end)
