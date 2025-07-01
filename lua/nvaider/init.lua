@@ -126,17 +126,20 @@ function M.add()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/add " .. file)
+  vim.notify("Added file: " .. file, vim.log.levels.INFO)
 end
 
 function M.drop()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/drop " .. file)
+  vim.notify("Dropped file: " .. file, vim.log.levels.INFO)
 end
 
 function M.dropall()
   if not ensure_running() then return end
   M.send("/drop")
+  vim.notify("All files dropped", vim.log.levels.INFO)
 end
 
 function M.reset()
