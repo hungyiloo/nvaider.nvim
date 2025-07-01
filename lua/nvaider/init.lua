@@ -112,15 +112,7 @@ end
 function M.show()
   if not ensure_running() then return end
   if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then return end
-  local current_win = vim.api.nvim_get_current_win()
-  vim.cmd('rightbelow vsplit')
-  M.state.win_id = vim.api.nvim_get_current_win()
-  vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
-  vim.api.nvim_win_set_option(M.state.win_id, 'number', false)
-  vim.api.nvim_win_set_option(M.state.win_id, 'relativenumber', false)
-  local win_width = math.floor(vim.o.columns * 0.35)
-  vim.api.nvim_win_set_width(M.state.win_id, win_width)
-  vim.api.nvim_buf_set_keymap(M.state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
+  local current_win = open_window(false)
   vim.api.nvim_set_current_win(current_win)
 end
 
