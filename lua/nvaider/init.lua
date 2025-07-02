@@ -59,7 +59,7 @@ local function handle_stdout_prompt(data)
     line = string.sub(line, 1, #line - 1) -- last character of the line seems to be junk
 
     -- detect unanswered questions based on yes/no pattern and an ending colon
-    if line:match("%? %(Y%)es/%(N%)o") and line:match(":$") then
+    if line:match("%? %(Y%)es/%(N%)o") and (string.sub(line, -1, -1) == ":" or string.sub(line, -2, -2) == ":") then
       vim.schedule(function()
         vim.ui.input({ prompt = line .. " " }, function(input)
           if input then
