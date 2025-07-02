@@ -31,7 +31,7 @@ local function highlight_changes()
     if vim.api.nvim_buf_is_valid(bufnr) then
       vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
     end
-  end, 200)
+  end, 500)
 end
 
 -- ensure the aider process is running
