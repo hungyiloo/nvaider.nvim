@@ -104,6 +104,7 @@ local function debounce_check()
 end
 
 function M.start()
+  -- FIX: prevent double start if start() is called before the previous start() has finished setting the job_id. ai!
   if M.state.job_id then
     M.focus()
     return
