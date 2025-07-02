@@ -76,10 +76,14 @@ end
 
 local function handle_stdout_prompt(data)
   for _, line in ipairs(data) do
-    if line:match("%? %(Y%)es/%(N%)o") and line:match(": $") then
+    -- strip ANSI escape/control characters from terminal output
+    line = line:gsub("\27%[%??[0-9;]*[ABCDHJKlmsu]", "")
+    line = string.sub(line, 1, #line - 1) -- last character of the line seems to be junk
+
+    -- detect unanswered questions based on yes/no pattern and an ending colon
+    if line:match("%? %(Y%)es/%(N%)o") and line:match(":$") then
       vim.schedule(function()
-        local clean = line:gsub("\27%[[0-9;]*m", "")
-        vim.ui.input({ prompt = clean .. " " }, function(input)
+        vim.ui.input({ prompt = line .. " " }, function(input)
           if input then
             vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
           end
