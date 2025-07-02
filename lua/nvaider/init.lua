@@ -22,6 +22,10 @@ local function ensure_running()
   return true
 end
 
+local function get_terminal_width()
+  return math.floor(vim.o.columns * 0.35)
+end
+
 local function open_window(enter_insert)
   local current_win = vim.api.nvim_get_current_win()
   vim.cmd('rightbelow vsplit')
@@ -29,7 +33,7 @@ local function open_window(enter_insert)
   vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
   vim.api.nvim_set_option_value('number', false, { win = M.state.win_id })
   vim.api.nvim_set_option_value('relativenumber', false, { win = M.state.win_id })
-  local win_width = math.floor(vim.o.columns * 0.35)
+  local win_width = get_terminal_width()
   vim.api.nvim_win_set_width(M.state.win_id, win_width)
   vim.api.nvim_buf_set_keymap(M.state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
   if enter_insert then vim.cmd('startinsert') end
@@ -43,6 +47,7 @@ function M.start()
   vim.api.nvim_buf_call(buf, function()
     M.state.job_id = vim.fn.jobstart(args, {
       term = true,
+      width = get_terminal_width(),
       cwd = vim.fn.getcwd(),
       on_stdout = function(_, _, _)
         if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
