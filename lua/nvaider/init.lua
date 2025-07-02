@@ -154,25 +154,11 @@ end
 
 function M.send(text)
   if not ensure_running() then return end
-  if text == '' then
-    vim.ui.input({ prompt = 'aider> ' }, function(input)
-      if not input or input == '' then return end
-      vim.fn.chansend(M.state.job_id, input .. '\n')
-    end)
-    return
-  end
   vim.fn.chansend(M.state.job_id, text .. '\n')
 end
 
 function M.ask(text)
   if not ensure_running() then return end
-  if text == '' then
-    vim.ui.input({ prompt = 'ask aider> ' }, function(input)
-      if not input or input == '' then return end
-      vim.fn.chansend(M.state.job_id, '/ask ' .. input .. '\n')
-    end)
-    return
-  end
   vim.fn.chansend(M.state.job_id, '/ask ' .. text .. '\n')
 end
 
@@ -265,11 +251,25 @@ function M.setup(opts)
     elseif sub == 'send' then
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
-      M.send(txt)
+      if txt == '' then
+        vim.ui.input({ prompt = 'aider> ' }, function(input)
+          if not input or input == '' then return end
+          M.send(input)
+        end)
+      else
+        M.send(txt)
+      end
     elseif sub == 'ask' then
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
-      M.ask(txt)
+      if txt == '' then
+        vim.ui.input({ prompt = 'ask aider> ' }, function(input)
+          if not input or input == '' then return end
+          M.ask(input)
+        end)
+      else
+        M.ask(txt)
+      end
     elseif sub == 'show' then
       M.show()
     elseif sub == 'focus' then
