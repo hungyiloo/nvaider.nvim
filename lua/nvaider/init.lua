@@ -12,6 +12,28 @@ local M = {
   },
 }
 
+local ns = vim.api.nvim_create_namespace("nvaider_change_highlight")
+local old_lines = {}
+
+local function snapshot_buffer()
+  old_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+end
+
+local function highlight_changes()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  for i, new in ipairs(new_lines) do
+    if old_lines[i] ~= new then
+      vim.api.nvim_buf_add_highlight(bufnr, ns, "Visual", i-1, 0, -1)
+    end
+  end
+  vim.defer_fn(function()
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    end
+  end, 200)
+end
+
 -- ensure the aider process is running
 local function ensure_running()
   if not M.state.job_id then
@@ -68,6 +90,7 @@ function M.start()
         end
         M.state.check_timer = vim.uv.new_timer()
         M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
+          snapshot_buffer()
           vim.cmd('silent! checktime')
           -- clean up
           M.state.check_timer:stop()
@@ -239,5 +262,9 @@ end
 
 -- auto-initialize with defaults
 M.setup()
+
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  callback = highlight_changes,
+})
 
 return M
