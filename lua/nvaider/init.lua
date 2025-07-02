@@ -64,6 +64,44 @@ local function open_window(enter_insert)
   return current_win
 end
 
+local function handle_stdout_prompt(data)
+  for _, line in ipairs(data) do
+    if line:match("? %(Y%)es/%(N%)o") then
+      vim.schedule(function()
+        vim.ui.input({ prompt = line .. " " }, function(input)
+          if input then
+            vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
+          end
+        end)
+      end)
+    end
+  end
+end
+
+local function scroll_to_latest()
+  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+    if vim.api.nvim_get_current_win() ~= M.state.win_id then
+      vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
+    end
+  end
+end
+
+local function debounce_check()
+  if M.state.check_timer then
+    M.state.check_timer:stop()
+    M.state.check_timer:close()
+  end
+  M.state.check_timer = vim.uv.new_timer()
+  M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
+    snapshot_buffer()
+    vim.cmd('silent! checktime')
+    -- clean up
+    M.state.check_timer:stop()
+    M.state.check_timer:close()
+    M.state.check_timer = nil
+  end))
+end
+
 function M.start()
   if M.state.job_id then
     M.focus()
@@ -76,41 +114,10 @@ function M.start()
       term = true,
       width = get_terminal_width(),
       cwd = vim.fn.getcwd(),
-      -- refactor each of the sections in the on_stdout handler into separate local functions. ai!
       on_stdout = function(_, data, _)
-        for _, line in ipairs(data) do
-          if line:match("? %(Y%)es/%(N%)o") then
-            vim.schedule(function()
-              vim.ui.input({
-                prompt = line .. " ",
-              }, function(input)
-                if input then
-                  vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
-                end
-              end)
-            end)
-          end
-        end
-        if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-          if vim.api.nvim_get_current_win() ~= M.state.win_id then
-            vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
-          end
-        end
-
-        -- debounce checktime
-        if M.state.check_timer then
-          M.state.check_timer:stop()
-          M.state.check_timer:close()
-        end
-        M.state.check_timer = vim.uv.new_timer()
-        M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
-          snapshot_buffer()
-          vim.cmd('silent! checktime')
-          -- clean up
-          M.state.check_timer:stop()
-          M.state.check_timer:close()
-          M.state.check_timer = nil
-        end))
+        handle_stdout_prompt(data)
+        scroll_to_latest()
+        debounce_check()
       end,
       on_exit = function()
         M.state.job_id = nil
