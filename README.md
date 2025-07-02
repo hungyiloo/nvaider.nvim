@@ -48,10 +48,14 @@ Available subcommands:
   Sends `/drop` to aider, removing all tracked files.  
 - `reset`  
   Sends `/reset` to aider, clearing all state.  
+- `abort`  
+  Sends an abort signal (Ctrl+C) to the running aider process.  
 - `commit`  
   Sends `/commit` to aider and notifies on completion.  
 - `send [text]`  
-  Sends arbitrary text. If no text is provided, prompts you for input.
+  Sends arbitrary text. If no text is provided, prompts you for input.  
+- `ask [text]`  
+  Sends `/ask <text>` to aider. If no text is provided, prompts you for input.  
 
 Tab completion for subcommands is available when typing `:Aider ` and pressing `<Tab>`.
 
