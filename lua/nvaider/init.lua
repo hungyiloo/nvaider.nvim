@@ -12,27 +12,6 @@ local M = {
   },
 }
 
-local old_lines = {}
-
-local FILE_CHANGED_AUG = "nvaider_filechange"
-
-vim.fn.sign_define("NvaiderChange", { text = "▎", texthl = "DiffChange" })
-
-local function snapshot_buffer()
-  old_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-end
-
-local function indicate_new_changes()
-  local bufnr = vim.api.nvim_get_current_buf()
-  vim.fn.sign_unplace("nvaider", {buffer = bufnr})
-  local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  for i, new in ipairs(new_lines) do
-    if old_lines[i] ~= new then
-      vim.fn.sign_place(0, "nvaider", "NvaiderChange", bufnr, {lnum = i, priority = 10})
-    end
-  end
-end
-
 local function is_running()
   if M.state.buf_nr and not vim.api.nvim_buf_is_valid(M.state.buf_nr) then
     M.state.job_id = nil
@@ -107,7 +86,6 @@ local function debounce_check()
   end
   M.state.check_timer = vim.uv.new_timer()
   M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
-    snapshot_buffer()
     vim.cmd('silent! checktime')
     -- clean up
     M.state.check_timer:stop()
@@ -144,23 +122,12 @@ function M.start()
           vim.api.nvim_win_close(M.state.win_id, true)
         end
         M.state.win_id = nil
-
-        -- cleanup autocmd group when aider exits
-        vim.api.nvim_del_augroup_by_name(FILE_CHANGED_AUG)
       end,
     })
     vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
     M._starting = false
   end)
   M.state.buf_nr = buf
-
-  -- file-change watcher active during aider session
-  vim.api.nvim_create_augroup(FILE_CHANGED_AUG, { clear = true })
-  vim.api.nvim_create_autocmd("FileChangedShellPost", {
-    group    = FILE_CHANGED_AUG,
-    callback = indicate_new_changes,
-  })
-
 end
 
 function M.stop()
@@ -171,9 +138,6 @@ function M.stop()
     vim.api.nvim_win_close(M.state.win_id, true)
   end
   M.state.win_id = nil
-
-  -- remove nvaider file-change autocmd when stopping
-  vim.api.nvim_del_augroup_by_name(FILE_CHANGED_AUG)
 end
 
 function M.toggle()
