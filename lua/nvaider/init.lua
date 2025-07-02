@@ -154,11 +154,18 @@ end
 
 function M.send(text)
   if not ensure_running() then return end
+  if text:find('\n') then
+    text = "{nvaider\n" .. text .. "\nnvaider}"
+  end
   vim.fn.chansend(M.state.job_id, text .. '\n')
 end
 
 function M.ask(text)
-  M.send('/ask ' .. text)
+  -- we could send "/ask {user input}" but that would fail with multiline text,
+  -- so instead we switch aider's mode temporarily for the query, then switch back after sending the text.
+  M.send('/ask')
+  M.send(text)
+  M.send('/code')
 end
 
 function M.add()
