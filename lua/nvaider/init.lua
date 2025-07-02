@@ -76,6 +76,7 @@ end
 
 local function handle_stdout_prompt(data)
   for _, line in ipairs(data) do
+    -- and check that line also ends with ": " in the line below. ai!
     if line:match("? %(Y%)es/%(N%)o") then
       vim.schedule(function()
         local clean = line:gsub("\27%[[0-9;]*m", "")
