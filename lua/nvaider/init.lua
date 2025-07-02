@@ -104,8 +104,12 @@ local function debounce_check()
 end
 
 function M.start()
-  -- FIX: prevent double start if start() is called before the previous start() has finished setting the job_id. ai!
+  if M._starting then
+    return
+  end
+  M._starting = true
   if M.state.job_id then
+    M._starting = false
     M.focus()
     return
   end
@@ -130,6 +134,7 @@ function M.start()
       end,
     })
     vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
+    M._starting = false
   end)
   M.state.buf_nr = buf
 end
