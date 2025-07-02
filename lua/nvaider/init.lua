@@ -14,6 +14,8 @@ local M = {
 
 local old_lines = {}
 
+local FILE_CHANGED_AUG = "nvaider_filechange"
+
 vim.fn.sign_define("NvaiderChange", { text = "▎", texthl = "DiffChange" })
 
 local function snapshot_buffer()
