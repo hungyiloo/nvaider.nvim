@@ -73,9 +73,10 @@ function M.start()
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
   vim.api.nvim_buf_call(buf, function()
     M.state.job_id = vim.fn.jobstart(args, {
-      pty = true,
+      term = true,
       width = get_terminal_width(),
       cwd = vim.fn.getcwd(),
+      -- refactor each of the sections in the on_stdout handler into separate local functions. ai!
       on_stdout = function(_, data, _)
         for _, line in ipairs(data) do
           if line:match("? %(Y%)es/%(N%)o") then
