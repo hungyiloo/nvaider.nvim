@@ -142,12 +142,23 @@ function M.start()
           vim.api.nvim_win_close(M.state.win_id, true)
         end
         M.state.win_id = nil
+
+        -- cleanup autocmd group when aider exits
+        vim.api.nvim_del_augroup_by_name(FILE_CHANGED_AUG)
       end,
     })
     vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
     M._starting = false
   end)
   M.state.buf_nr = buf
+
+  -- file-change watcher active during aider session
+  vim.api.nvim_create_augroup(FILE_CHANGED_AUG, { clear = true })
+  vim.api.nvim_create_autocmd("FileChangedShellPost", {
+    group    = FILE_CHANGED_AUG,
+    callback = indicate_new_changes,
+  })
+
 end
 
 function M.stop()
@@ -158,6 +169,9 @@ function M.stop()
     vim.api.nvim_win_close(M.state.win_id, true)
   end
   M.state.win_id = nil
+
+  -- remove nvaider file-change autocmd when stopping
+  vim.api.nvim_del_augroup_by_name(FILE_CHANGED_AUG)
 end
 
 function M.toggle()
@@ -310,8 +324,5 @@ end
 -- auto-initialize with defaults
 M.setup()
 
-vim.api.nvim_create_autocmd("FileChangedShellPost", {
-  callback = indicate_new_changes,
-})
 
 return M
