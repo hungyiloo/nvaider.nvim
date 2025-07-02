@@ -153,6 +153,12 @@ function M.reset()
   M.send("/reset")
 end
 
+function M.commit()
+  if not ensure_running() then return end
+  M.send("/commit")
+  vim.notify("Committed changes", vim.log.levels.INFO, { title = "nvaider" })
+end
+
 function M.show()
   if not ensure_running() then return end
   if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then return end
@@ -198,6 +204,8 @@ function M.setup(opts)
       M.dropall()
     elseif sub == 'reset' then
       M.reset()
+    elseif sub == 'commit' then
+      M.commit()
     elseif sub == 'send' then
       table.remove(args, 1)
       local txt = table.concat(args, ' ')
@@ -218,7 +226,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'send', 'ask', 'show', 'focus', 'hide' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
