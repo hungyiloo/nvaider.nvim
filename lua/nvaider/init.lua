@@ -19,6 +19,7 @@ local function snapshot_buffer()
   old_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 end
 
+-- can this function indicate the changes in the gutter instead of flashing a highlight? sometimes the changes happen off screen and I can't see the flash. ai?
 local function highlight_changes()
   local bufnr = vim.api.nvim_get_current_buf()
   local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
@@ -225,7 +226,7 @@ end
 
 function M.abort()
   if not ensure_running() then return end
-  vim.fn.chansend(M.state.job_id, "\003")
+  vim.fn.chansend(M.state.job_id, "\003") -- Ctrl+C
   vim.notify("Sent abort signal to aider", vim.log.levels.INFO, { title = "nvaider" })
 end
 
