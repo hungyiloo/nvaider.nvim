@@ -48,6 +48,8 @@ Available subcommands:
   Sends `/drop` to aider, removing all tracked files.  
 - `reset`  
   Sends `/reset` to aider, clearing all state.  
+- `commit`  
+  Sends `/commit` to aider and notifies on completion.  
 - `send [text]`  
   Sends arbitrary text. If no text is provided, prompts you for input.
 
