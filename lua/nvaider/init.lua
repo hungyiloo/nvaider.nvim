@@ -223,6 +223,12 @@ function M.reset()
   M.send("/reset")
 end
 
+function M.abort()
+  if not ensure_running() then return end
+  vim.fn.chansend(M.state.job_id, "\003")
+  vim.notify("Sent abort signal to aider", vim.log.levels.INFO, { title = "nvaider" })
+end
+
 function M.commit()
   if not ensure_running() then return end
   M.send("/commit")
@@ -274,6 +280,8 @@ function M.setup(opts)
       M.dropall()
     elseif sub == 'reset' then
       M.reset()
+    elseif sub == 'abort' then
+      M.abort()
     elseif sub == 'commit' then
       M.commit()
     elseif sub == 'send' then
@@ -296,7 +304,7 @@ function M.setup(opts)
   end, {
     nargs = '*',
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
