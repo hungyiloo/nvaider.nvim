@@ -158,8 +158,7 @@ function M.send(text)
 end
 
 function M.ask(text)
-  if not ensure_running() then return end
-  vim.fn.chansend(M.state.job_id, '/ask ' .. text .. '\n')
+  M.send('/ask ' .. text)
 end
 
 function M.add()
