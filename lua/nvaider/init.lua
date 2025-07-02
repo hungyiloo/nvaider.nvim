@@ -78,14 +78,10 @@ function M.start()
       cwd = vim.fn.getcwd(),
       on_stdout = function(_, data, _)
         for _, line in ipairs(data) do
-          if line:match("%(Y%)es/%(N%)o") then
+          if line:match("? %(Y%)es/%(N%)o") then
             vim.schedule(function()
               vim.ui.input({
                 prompt = line .. " ",
-                completion = function(_, input)
-                  local c = input:sub(1,1):upper()
-                  return (c == "Y" or c == "N") and c or nil
-                end
               }, function(input)
                 if input then
                   vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
