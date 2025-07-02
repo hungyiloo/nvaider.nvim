@@ -14,10 +14,12 @@ local M = {
 
 -- ensure the aider process is running
 local function ensure_running()
-  M.start()
   if not M.state.job_id then
-    vim.notify("Aider is not running", vim.log.levels.ERROR, { title = "nvaider" })
-    return false
+    M.start()
+    if not M.state.job_id then
+      vim.notify("Aider could not start", vim.log.levels.ERROR, { title = "nvaider" })
+      return false
+    end
   end
   return true
 end
@@ -78,7 +80,7 @@ function M.start()
         M.state.win_id = nil
       end,
     })
-    vim.notify("Started aider", vim.log.levels.INFO, { title = "nvaider" })
+    vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
   end)
   M.state.buf_nr = buf
 end
