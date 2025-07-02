@@ -43,7 +43,10 @@ local function open_window(enter_insert)
 end
 
 function M.start()
-  if M.state.job_id then M.focus() end
+  if M.state.job_id then
+    M.focus()
+    return
+  end
   local buf = vim.api.nvim_create_buf(false, true)
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
   vim.api.nvim_buf_call(buf, function()
