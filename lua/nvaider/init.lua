@@ -12,7 +12,6 @@ local M = {
   },
 }
 
-local ns = vim.api.nvim_create_namespace("nvaider_change_highlight")
 local old_lines = {}
 
 vim.fn.sign_define("NvaiderChange", { text = "▎", texthl = "DiffChange" })
@@ -21,8 +20,7 @@ local function snapshot_buffer()
   old_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 end
 
--- can this function indicate the changes in the gutter instead of flashing a highlight? sometimes the changes happen off screen and I can't see the flash. ai?
-local function highlight_changes()
+local function indicate_new_changes()
   local bufnr = vim.api.nvim_get_current_buf()
   vim.fn.sign_unplace("nvaider", {buffer = bufnr})
   local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
@@ -313,7 +311,7 @@ end
 M.setup()
 
 vim.api.nvim_create_autocmd("FileChangedShellPost", {
-  callback = highlight_changes,
+  callback = indicate_new_changes,
 })
 
 return M
