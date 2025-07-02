@@ -52,22 +52,25 @@ local function open_window(enter_insert)
   return current_win
 end
 
+-- debounce state for question notifications (in ms)
+local last_question_notify = 0
+local QUESTION_DEBOUNCE_MS = 1000
 local function handle_stdout_prompt(data)
+  local last_line = ""
   for _, line in ipairs(data) do
     -- strip ANSI escape/control characters from terminal output
-    line = line:gsub("\27%[%??[0-9;]*[ABCDHJKlmsu]", "")
-    line = string.sub(line, 1, #line - 1) -- last character of the line seems to be junk
+    local text = (last_line .. line):gsub("\n", ""):gsub("\27%[%??[0-9;]*[ABCDHJKlmsu]", "")
+    text = string.sub(text, 1, #text - 1) -- last character of the line seems to be junk
 
     -- detect unanswered questions based on yes/no pattern and an ending colon
-    if line:match("%? %(Y%)es/%(N%)o") and (string.sub(line, -1, -1) == ":" or string.sub(line, -2, -2) == ":") then
-      vim.schedule(function()
-        vim.ui.input({ prompt = line .. " " }, function(input)
-          if input then
-            vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
-          end
-        end)
-      end)
+    if (text:match("%(Y%)") or text:match("%(N%)")) and (string.sub(text, -1, -1) == ":" or string.sub(text, -2, -2) == ":") then
+      local now = vim.loop.now()
+      if now - last_question_notify > QUESTION_DEBOUNCE_MS then
+        vim.notify("Aider might have a question for you. :Aider focus to answer it.", vim.log.levels.INFO, { title = "nvaider" })
+        last_question_notify = now
+      end
     end
+    last_line = line
   end
 end
 
