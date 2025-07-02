@@ -34,16 +34,21 @@ local function highlight_changes()
   end, 500)
 end
 
--- ensure the aider process is running
-local function ensure_running()
+local function is_running()
   if M.state.buf_nr and not vim.api.nvim_buf_is_valid(M.state.buf_nr) then
     M.state.job_id = nil
     M.state.buf_nr = nil
     M.state.win_id = nil
   end
-  if not M.state.job_id then
+  if M.state.job_id then return true end
+  return false
+end
+
+-- ensure the aider process is running
+local function ensure_running()
+  if not is_running() then
     M.start()
-    if not M.state.job_id then
+    if not is_running() then
       vim.notify("Aider could not start", vim.log.levels.ERROR, { title = "nvaider" })
       return false
     end
@@ -113,7 +118,7 @@ function M.start()
     return
   end
   M._starting = true
-  if M.state.job_id then
+  if is_running() then
     M._starting = false
     M.focus()
     return
