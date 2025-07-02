@@ -36,7 +36,11 @@ end
 
 -- ensure the aider process is running
 local function ensure_running()
-  -- buf_nr also needs to be checked if valid. if not valid, assume aider is stopped and adjust accordingly. ai!
+  if M.state.buf_nr and not vim.api.nvim_buf_is_valid(M.state.buf_nr) then
+    M.state.job_id = nil
+    M.state.buf_nr = nil
+    M.state.win_id = nil
+  end
   if not M.state.job_id then
     M.start()
     if not M.state.job_id then
