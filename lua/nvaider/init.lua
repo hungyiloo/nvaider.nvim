@@ -138,6 +138,7 @@ function M.stop()
     vim.api.nvim_win_close(M.state.win_id, true)
   end
   M.state.win_id = nil
+  vim.notify("Stopped aider", vim.log.levels.INFO, { title = "nvaider" })
 end
 
 function M.toggle()
