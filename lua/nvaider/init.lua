@@ -68,6 +68,7 @@ local function handle_stdout_prompt(data)
   for _, line in ipairs(data) do
     if line:match("? %(Y%)es/%(N%)o") then
       vim.schedule(function()
+        -- `line` should be stripped of terminal escape characters before being provided to vim.ui.input. ai!
         vim.ui.input({ prompt = line .. " " }, function(input)
           if input then
             vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
