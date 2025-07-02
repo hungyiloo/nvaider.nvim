@@ -36,6 +36,7 @@ end
 
 -- ensure the aider process is running
 local function ensure_running()
+  -- buf_nr also needs to be checked if valid. if not valid, assume aider is stopped and adjust accordingly. ai!
   if not M.state.job_id then
     M.start()
     if not M.state.job_id then
