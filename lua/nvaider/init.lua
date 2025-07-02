@@ -73,10 +73,27 @@ function M.start()
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
   vim.api.nvim_buf_call(buf, function()
     M.state.job_id = vim.fn.jobstart(args, {
-      term = true,
+      pty = true,
       width = get_terminal_width(),
       cwd = vim.fn.getcwd(),
-      on_stdout = function(_, _, _)
+      on_stdout = function(_, data, _)
+        for _, line in ipairs(data) do
+          if line:match("%(Y%)es/%(N%)o") then
+            vim.schedule(function()
+              vim.ui.input({
+                prompt = line .. " ",
+                completion = function(_, input)
+                  local c = input:sub(1,1):upper()
+                  return (c == "Y" or c == "N") and c or nil
+                end
+              }, function(input)
+                if input then
+                  vim.fn.chansend(M.state.job_id, input:sub(1,1):upper() .. "\n")
+                end
+              end)
+            end)
+          end
+        end
         if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
           if vim.api.nvim_get_current_win() ~= M.state.win_id then
             vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
