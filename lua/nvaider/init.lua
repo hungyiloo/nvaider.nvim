@@ -161,11 +161,7 @@ function M.send(text)
 end
 
 function M.ask(text)
-  -- we could send "/ask {user input}" but that would fail with multiline text,
-  -- so instead we switch aider's mode temporarily for the query, then switch back after sending the text.
-  M.send('/ask')
-  M.send(text)
-  M.send('/code')
+  M.send('/ask ' .. text)
 end
 
 function M.add()
@@ -229,6 +225,67 @@ function M.focus()
   end
 end
 
+function M.dispatch(sub, args)
+  local function handle_user_input(cmd_fn, prompt)
+    local txt = table.concat(args or {}, ' ')
+    if txt == '' then
+      local mode = vim.fn.mode()
+      if mode == 'v' or mode == 'V' or mode == '\22' then
+        local esc = vim.api.nvim_replace_termcodes('<esc>', true, false, true)
+        vim.api.nvim_feedkeys(esc, 'x', false)
+        local bufnr = vim.api.nvim_get_current_buf()
+        local _, from_row, from_col = unpack(vim.fn.getpos("'<"))
+        local _, to_row, to_col = unpack(vim.fn.getpos("'>"))
+        from_col = from_col - 1
+        from_row = from_row - 1
+        to_col = math.min(to_col, string.len(vim.fn.getline(to_row)))
+        to_row = to_row - 1
+        local text = vim.api.nvim_buf_get_text(bufnr, from_row, from_col, to_row, to_col, {})
+        cmd_fn(table.concat(text, '\n'))
+      else
+        vim.ui.input({ prompt = prompt }, function(input)
+          if not input or input == '' then return end
+          cmd_fn(input)
+        end)
+      end
+    else
+      cmd_fn(txt)
+    end
+  end
+
+  if sub == 'start' then
+    M.start()
+  elseif sub == 'stop' then
+    M.stop()
+  elseif sub == 'toggle' then
+    M.toggle()
+  elseif sub == 'add' then
+    M.add()
+  elseif sub == 'drop' then
+    M.drop()
+  elseif sub == 'dropall' then
+    M.dropall()
+  elseif sub == 'reset' then
+    M.reset()
+  elseif sub == 'abort' then
+    M.abort()
+  elseif sub == 'commit' then
+    M.commit()
+  elseif sub == 'send' then
+    handle_user_input(M.send, 'aider> ')
+  elseif sub == 'ask' then
+    handle_user_input(M.ask, 'ask aider> ')
+  elseif sub == 'show' then
+    M.show()
+  elseif sub == 'focus' then
+    M.focus()
+  elseif sub == 'hide' then
+    M.hide()
+  else
+    vim.notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR, { title = "nvaider" })
+  end
+end
+
 function M.setup(opts)
   M.config = vim.tbl_extend('force', M.config, opts or {})
   if M._initialized then return end
@@ -236,57 +293,11 @@ function M.setup(opts)
   vim.api.nvim_create_user_command('Aider', function(cmd_opts)
     local args = vim.fn.split(cmd_opts.args)
     local sub = args[1]
-    if sub == 'start' then
-      M.start()
-    elseif sub == 'stop' then
-      M.stop()
-    elseif sub == 'toggle' then
-      M.toggle()
-    elseif sub == 'add' then
-      M.add()
-    elseif sub == 'drop' then
-      M.drop()
-    elseif sub == 'dropall' then
-      M.dropall()
-    elseif sub == 'reset' then
-      M.reset()
-    elseif sub == 'abort' then
-      M.abort()
-    elseif sub == 'commit' then
-      M.commit()
-    elseif sub == 'send' then
-      table.remove(args, 1)
-      local txt = table.concat(args, ' ')
-      if txt == '' then
-        vim.ui.input({ prompt = 'aider> ' }, function(input)
-          if not input or input == '' then return end
-          M.send(input)
-        end)
-      else
-        M.send(txt)
-      end
-    elseif sub == 'ask' then
-      table.remove(args, 1)
-      local txt = table.concat(args, ' ')
-      if txt == '' then
-        vim.ui.input({ prompt = 'ask aider> ' }, function(input)
-          if not input or input == '' then return end
-          M.ask(input)
-        end)
-      else
-        M.ask(txt)
-      end
-    elseif sub == 'show' then
-      M.show()
-    elseif sub == 'focus' then
-      M.focus()
-    elseif sub == 'hide' then
-      M.hide()
-    else
-      vim.notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR, { title = "nvaider" })
-    end
+    table.remove(args, 1)
+    M.dispatch(sub, args)
   end, {
     nargs = '*',
+    range = true,
     complete = function(argLead, cmdLine, cursorPos)
       local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
