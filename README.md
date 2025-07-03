@@ -46,35 +46,35 @@ The plugin defines a single user command:
 
 Available subcommands:
 
-- `start`  
+- 🚀 `start`  
   Starts aider in a hidden terminal buffer (use with aider's [`--watch-files`](https://aider.chat/docs/usage/watch.html)).  
-- `stop`  
+- 🛑 `stop`  
   Stops aider process and closes any open window.  
-- `toggle`  
+- 🔄 `toggle`  
   Toggles a side window displaying aider terminal.  
-- `show`  
+- 👀 `show`  
   Opens a side window displaying aider terminal.  
-- `hide`  
+- 🙈 `hide`  
   Closes the side window displaying aider terminal.  
-- `focus`  
+- 🔍 `focus`  
   Opens the side window displaying aider terminal and enters input mode.  
-- `add`  
+- ➕ `add`  
   Sends `/add <current-file-path>` to aider.  
-- `read`  
+- 📖 `read`  
   Sends `/read-only <current-file-path>` to aider, tracking the file in read-only mode.  
-- `drop`  
+- 🗑️ `drop`  
   Sends `/drop <current-file-path>` to aider.  
-- `dropall`  
+- 🗑️ `dropall`  
   Sends `/drop` to aider, removing all tracked files.  
-- `reset`  
+- ♻️ `reset`  
   Sends `/reset` to aider, clearing all state.  
-- `abort`  
+- 🚫 `abort`  
   Sends an abort signal (Ctrl+C) to the running aider process.  
-- `commit`  
+- ✅ `commit`  
   Sends `/commit` to aider and notifies on completion.  
-- `send [text]`  
+- 📤 `send [text]`  
   Sends arbitrary text. If no text is provided, prompts you for input.  
-- `ask [text]`  
+- ❓ `ask [text]`  
   Sends `/ask <text>` to aider. If no text is provided, prompts you for input.  
 
 Tab completion for subcommands is available when typing `:Aider ` and pressing `<Tab>`.
