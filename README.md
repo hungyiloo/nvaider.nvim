@@ -49,6 +49,8 @@ Available subcommands:
 
 - 🚀 `start`  
   Starts aider in a hidden terminal buffer (use with aider's [`--watch-files`](https://aider.chat/docs/usage/watch.html)).  
+- 🚀 `launch`  
+  Prompts for custom aider arguments and starts aider with those arguments.  
 - 🛑 `stop`  
   Stops aider process and closes any open window.  
 - 🔄 `toggle`  
