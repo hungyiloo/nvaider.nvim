@@ -12,6 +12,10 @@ local M = {
   },
 }
 
+local function notify(message, level)
+  vim.notify(message, level or vim.log.levels.INFO, { title = "nvaider" })
+end
+
 local function reset_state()
   M.state.job_id = nil
   M.state.buf_nr = nil
@@ -36,7 +40,7 @@ local function ensure_running()
   if not is_running() then
     M.start()
     if not is_running() then
-      vim.notify("Aider could not start", vim.log.levels.ERROR, { title = "nvaider" })
+      notify("Aider could not start", vim.log.levels.ERROR)
       return false
     end
   end
@@ -75,7 +79,7 @@ local function handle_stdout_prompt(data)
     if (text:match("%(Y%)") or text:match("%(N%)")) and text:match(":") then
       local now = vim.loop.now()
       if now - last_question_notify > QUESTION_DEBOUNCE_MS then
-        vim.notify("Aider might have a question for you. :Aider focus to answer it.", vim.log.levels.INFO, { title = "nvaider" })
+        notify("Aider might have a question for you. :Aider focus to answer it.")
         last_question_notify = now
       end
     end
@@ -136,7 +140,7 @@ function M.start(args_override)
           reset_state()
         end,
       })
-      vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
+      notify("Starting aider")
       M._starting = false
     end)
     M.state.buf_nr = buf
@@ -152,7 +156,7 @@ function M.start(args_override)
     if old_job_id then
       vim.fn.jobstop(old_job_id)
     end
-    vim.notify("Restarting aider", vim.log.levels.INFO, { title = "nvaider" })
+    notify("Restarting aider")
 
     -- Poll until the job actually exits, then start new one
     local function wait_for_exit()
@@ -189,7 +193,7 @@ function M.stop()
     vim.api.nvim_win_close(M.state.win_id, true)
   end
   reset_state()
-  vim.notify("Stopped aider", vim.log.levels.INFO, { title = "nvaider" })
+  notify("Stopped aider")
 end
 
 function M.toggle()
@@ -219,27 +223,27 @@ function M.add()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/add " .. file)
-  vim.notify("Added file: " .. file, vim.log.levels.INFO, { title = "nvaider" })
+  notify("Added file: " .. file)
 end
 
 function M.read()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/read-only " .. file)
-  vim.notify("Read-only file added: " .. file, vim.log.levels.INFO, { title = "nvaider" })
+  notify("Read-only file added: " .. file)
 end
 
 function M.drop()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
   M.send("/drop " .. file)
-  vim.notify("Dropped file: " .. file, vim.log.levels.INFO, { title = "nvaider" })
+  notify("Dropped file: " .. file)
 end
 
 function M.dropall()
   if not ensure_running() then return end
   M.send("/drop")
-  vim.notify("All files dropped", vim.log.levels.INFO, { title = "nvaider" })
+  notify("All files dropped")
 end
 
 function M.reset()
@@ -250,13 +254,13 @@ end
 function M.abort()
   if not ensure_running() then return end
   vim.fn.chansend(M.state.job_id, "\003") -- Ctrl+C
-  vim.notify("Sent abort signal to aider", vim.log.levels.INFO, { title = "nvaider" })
+  notify("Sent abort signal to aider")
 end
 
 function M.commit()
   if not ensure_running() then return end
   M.send("/commit")
-  vim.notify("Committed changes", vim.log.levels.INFO, { title = "nvaider" })
+  notify("Committed changes")
 end
 
 function M.show()
@@ -352,7 +356,7 @@ function M.dispatch(sub, args)
   elseif sub == 'hide' then
     M.hide()
   else
-    vim.notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR, { title = "nvaider" })
+    notify('Unknown subcommand: ' .. tostring(sub), vim.log.levels.ERROR)
   end
 end
 
