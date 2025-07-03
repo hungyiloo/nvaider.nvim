@@ -102,7 +102,7 @@ function M.start(args_override)
     return
   end
   M._starting = true
-  
+
   local function do_start()
     local buf = vim.api.nvim_create_buf(false, true)
     local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
@@ -129,7 +129,7 @@ function M.start(args_override)
     end)
     M.state.buf_nr = buf
   end
-  
+
   if is_running() then
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = M.state.job_id
@@ -138,18 +138,22 @@ function M.start(args_override)
       vim.api.nvim_win_close(M.state.win_id, true)
     end
     M.state.win_id = nil
-    
+
     -- Stop the old job and wait for it to exit before starting new one
-    vim.fn.jobstop(old_job_id)
+    if old_job_id then
+      vim.fn.jobstop(old_job_id)
+    end
     vim.notify("Restarting aider", vim.log.levels.INFO, { title = "nvaider" })
-    
+
     -- Use a timer to ensure the old process has time to exit
     local restart_timer = vim.uv.new_timer()
-    restart_timer:start(100, 0, vim.schedule_wrap(function()
-      restart_timer:stop()
-      restart_timer:close()
-      do_start()
-    end))
+    if restart_timer then
+      restart_timer:start(100, 0, vim.schedule_wrap(function()
+        restart_timer:stop()
+        restart_timer:close()
+        do_start()
+      end))
+    end
   else
     do_start()
   end
