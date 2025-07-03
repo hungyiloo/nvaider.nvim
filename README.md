@@ -1,4 +1,4 @@
-# nvaider
+# 🤖 `nvaider.nvim`
 
 A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands.
 
@@ -42,7 +42,7 @@ require("lazy").setup({
 
 The plugin defines a single user command:
 
-  :Aider <subcommand> <input text>
+  :Aider <subcommand> <optional input text>
 
 Available subcommands:
 
