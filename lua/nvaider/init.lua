@@ -97,6 +97,8 @@ local function debounce_check()
   end))
 end
 
+-- ai: if aider is already started, M.start should restart aider (with args_override if provided) instead of M.focus(), which is the current logic.
+-- I assume this should be done by calling M.stop() before continuing with the startup code, but I'm concerned about race conditions. Make sure to mitigate these, if any. ai!
 function M.start(args_override)
   if M._starting then
     return
