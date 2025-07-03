@@ -146,18 +146,29 @@ function M.start(args_override)
     end
     vim.notify("Restarting aider", vim.log.levels.INFO, { title = "nvaider" })
 
-    -- Use a timer to ensure the old process has time to exit
-    local restart_timer = vim.uv.new_timer()
-    if restart_timer then
-      restart_timer:start(100, 0, vim.schedule_wrap(function()
-        restart_timer:stop()
-        restart_timer:close()
-        do_start()
-        if was_window_showing then
-          open_window(false)
-        end
-      end))
+    -- Poll until the job actually exits, then start new one
+    local function wait_for_exit()
+      local restart_timer = vim.uv.new_timer()
+      if restart_timer then
+        restart_timer:start(50, 50, vim.schedule_wrap(function()
+          -- Check if job is still running
+          if old_job_id and vim.fn.jobwait({old_job_id}, 0)[1] == -1 then
+            -- Job still running, keep waiting
+            return
+          end
+          
+          -- Job has exited, clean up timer and start new instance
+          restart_timer:stop()
+          restart_timer:close()
+          do_start()
+          if was_window_showing then
+            open_window(false)
+          end
+        end))
+      end
     end
+    
+    wait_for_exit()
   else
     do_start()
   end
