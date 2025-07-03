@@ -12,11 +12,20 @@ local M = {
   },
 }
 
+local function reset_state()
+  M.state.job_id = nil
+  M.state.buf_nr = nil
+  M.state.win_id = nil
+  if M.state.check_timer then
+    M.state.check_timer:stop()
+    M.state.check_timer:close()
+    M.state.check_timer = nil
+  end
+end
+
 local function is_running()
   if M.state.buf_nr and not vim.api.nvim_buf_is_valid(M.state.buf_nr) then
-    M.state.job_id = nil
-    M.state.buf_nr = nil
-    M.state.win_id = nil
+    reset_state()
   end
   if M.state.job_id then return true end
   return false
@@ -121,11 +130,10 @@ function M.start(args_override)
           debounce_check()
         end,
         on_exit = function()
-          M.state.job_id = nil
           if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
             vim.api.nvim_win_close(M.state.win_id, true)
           end
-          M.state.win_id = nil
+          reset_state()
         end,
       })
       vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
@@ -138,7 +146,7 @@ function M.start(args_override)
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = M.state.job_id
     local was_window_showing = M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id)
-    M.state.job_id = nil
+    reset_state()
 
     -- Stop the old job and wait for it to exit before starting new one
     if old_job_id then
@@ -177,11 +185,10 @@ end
 function M.stop()
   if not M.state.job_id then return end
   vim.fn.jobstop(M.state.job_id)
-  M.state.job_id = nil
   if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
     vim.api.nvim_win_close(M.state.win_id, true)
   end
-  M.state.win_id = nil
+  reset_state()
   vim.notify("Stopped aider", vim.log.levels.INFO, { title = "nvaider" })
 end
 
