@@ -97,6 +97,7 @@ local function debounce_check()
   end))
 end
 
+-- ai: modify to take an optional parameter, which is the same type as the M.config.args, that overrides the args sent to the aider process
 function M.start()
   if M._starting then
     return
@@ -108,6 +109,7 @@ function M.start()
     return
   end
   local buf = vim.api.nvim_create_buf(false, true)
+  -- ai: the args override should probably happen here?
   local args = vim.list_extend({ M.config.cmd }, M.config.args)
   vim.api.nvim_buf_call(buf, function()
     M.state.job_id = vim.fn.jobstart(args, {
@@ -145,7 +147,7 @@ function M.stop()
 end
 
 function M.toggle()
-  if not M.state.job_id then M.start() end
+  if not ensure_running() then return end
   if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
     vim.api.nvim_win_close(M.state.win_id, true)
     M.state.win_id = nil
@@ -264,7 +266,11 @@ function M.dispatch(sub, args)
   end
 
   if sub == 'start' then
+    -- ai: if there are args provided to M.dispatch, provide them to the M.start call here.
+    -- ai: the goal is to allow the user to run ":Aider start --model azure/o4-mini --watch-files" for example, overriding the configured default args set in lazyvim opts
     M.start()
+    -- ai:also add another subcommand that uses handle_user_input to prompt for args to pass to M.start. A string split by space might be needed?
+    -- I can't think of a good subcommand name for this new one, so suggest a good one and implement it. ai!
   elseif sub == 'stop' then
     M.stop()
   elseif sub == 'toggle' then
