@@ -174,6 +174,13 @@ function M.add()
   vim.notify("Added file: " .. file, vim.log.levels.INFO, { title = "nvaider" })
 end
 
+function M.read()
+  if not ensure_running() then return end
+  local file = vim.fn.expand('%:p')
+  M.send("/read-only " .. file)
+  vim.notify("Read-only file added: " .. file, vim.log.levels.INFO, { title = "nvaider" })
+end
+
 function M.drop()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
@@ -264,6 +271,8 @@ function M.dispatch(sub, args)
     M.toggle()
   elseif sub == 'add' then
     M.add()
+  elseif sub == 'read' then
+    M.read()
   elseif sub == 'drop' then
     M.drop()
   elseif sub == 'dropall' then
@@ -302,7 +311,7 @@ function M.setup(opts)
     nargs = '*',
     range = true,
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+      local subs = { 'start', 'stop', 'toggle', 'add', 'read', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })

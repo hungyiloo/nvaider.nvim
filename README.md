@@ -42,6 +42,8 @@ Available subcommands:
   Opens the side window displaying aider terminal and enters input mode.  
 - `add`  
   Sends `/add <current-file-path>` to aider.  
+- `read`  
+  Sends `/read-only <current-file-path>` to aider, tracking the file in read-only mode.  
 - `drop`  
   Sends `/drop <current-file-path>` to aider.  
 - `dropall`  
