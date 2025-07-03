@@ -63,7 +63,7 @@ local function handle_stdout_prompt(data)
     text = string.sub(text, 1, #text - 1) -- last character of the line seems to be junk
 
     -- detect unanswered questions based on yes/no pattern and an ending colon
-    if (text:match("%(Y%)") or text:match("%(N%)")) and (string.sub(text, -1, -1) == ":" or string.sub(text, -2, -2) == ":") then
+    if (text:match("%(Y%)") or text:match("%(N%)")) and text:match(":") then
       local now = vim.loop.now()
       if now - last_question_notify > QUESTION_DEBOUNCE_MS then
         vim.notify("Aider might have a question for you. :Aider focus to answer it.", vim.log.levels.INFO, { title = "nvaider" })
