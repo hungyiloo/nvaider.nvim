@@ -14,8 +14,26 @@ require("lazy").setup({
       -- The aider binary or command to run
       cmd = "aider",
       -- Additional arguments passed to the aider CLI
-      args = { "--model", "o4-mini", "--watch-files" },
+      args = { "--model", "sonnet", "--watch-files" },
     },
+    -- optional key mappings
+    keys = {
+      { mode = "n", "<leader>a<space>", ":Aider toggle<cr>", desc = "Toggle aider", noremap = true, silent = true },
+      { mode = "n", "<leader>aa", ":Aider add<cr>", desc = "Add file", noremap = true, silent = true },
+      { mode = "n", "<leader>ad", ":Aider drop<cr>", desc = "Drop file", noremap = true, silent = true },
+      { mode = "n", "<leader>ar", ":Aider read<cr>", desc = "Add read-only file", noremap = true, silent = true },
+      { mode = "n", "<leader>aD", ":Aider dropall<cr>", desc = "Drop all files", noremap = true, silent = true },
+      { mode = "n", "<leader>aR", ":Aider reset<cr>", desc = "Reset aider", noremap = true, silent = true },
+      { mode = "n", "<leader>a.", ":Aider send<cr>", desc = "Send to aider", noremap = true, silent = true },
+      { mode = "n", "<leader>a?", ":Aider ask<cr>", desc = "Ask aider", noremap = true, silent = true },
+      { mode = "x", "<leader>a.", function () require("nvaider").dispatch("send") end, desc = "Send to aider", noremap = true, silent = true },
+      { mode = "x", "<leader>a?", function () require("nvaider").dispatch("ask") end, desc = "Ask aider", noremap = true, silent = true },
+      { mode = "n", "<leader>ac", ":Aider commit<cr>", desc = "Commit changes with aider", noremap = true, silent = true },
+      { mode = "n", "<leader>af", ":Aider focus<cr>", desc = "Focus input on aider", noremap = true, silent = true },
+      { mode = "n", "<leader>a!", ":Aider start<cr>", desc = "Start aider (background)", noremap = true, silent = true },
+      { mode = "n", "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider", noremap = true, silent = true },
+      { mode = "n", "<leader>ax", ":Aider abort<cr>", desc = "Send C-c to aider", noremap = true, silent = true },
+    }
   },
 })
 ```
@@ -24,7 +42,7 @@ require("lazy").setup({
 
 The plugin defines a single user command:
 
-  :Aider <subcommand> [text]
+  :Aider <subcommand> <input text>
 
 Available subcommands:
 
