@@ -97,42 +97,62 @@ local function debounce_check()
   end))
 end
 
--- ai: if aider is already started, M.start should restart aider (with args_override if provided) instead of M.focus(), which is the current logic.
--- I assume this should be done by calling M.stop() before continuing with the startup code, but I'm concerned about race conditions. Make sure to mitigate these, if any. ai!
 function M.start(args_override)
   if M._starting then
     return
   end
   M._starting = true
-  if is_running() then
-    M._starting = false
-    M.focus()
-    return
+  
+  local function do_start()
+    local buf = vim.api.nvim_create_buf(false, true)
+    local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
+    vim.api.nvim_buf_call(buf, function()
+      M.state.job_id = vim.fn.jobstart(args, {
+        term = true,
+        width = get_terminal_width(),
+        cwd = vim.fn.getcwd(),
+        on_stdout = function(_, data, _)
+          handle_stdout_prompt(data)
+          scroll_to_latest()
+          debounce_check()
+        end,
+        on_exit = function()
+          M.state.job_id = nil
+          if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+            vim.api.nvim_win_close(M.state.win_id, true)
+          end
+          M.state.win_id = nil
+        end,
+      })
+      vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
+      M._starting = false
+    end)
+    M.state.buf_nr = buf
   end
-  local buf = vim.api.nvim_create_buf(false, true)
-  local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
-  vim.api.nvim_buf_call(buf, function()
-    M.state.job_id = vim.fn.jobstart(args, {
-      term = true,
-      width = get_terminal_width(),
-      cwd = vim.fn.getcwd(),
-      on_stdout = function(_, data, _)
-        handle_stdout_prompt(data)
-        scroll_to_latest()
-        debounce_check()
-      end,
-      on_exit = function()
-        M.state.job_id = nil
-        if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-          vim.api.nvim_win_close(M.state.win_id, true)
-        end
-        M.state.win_id = nil
-      end,
-    })
-    vim.notify("Starting aider", vim.log.levels.INFO, { title = "nvaider" })
-    M._starting = false
-  end)
-  M.state.buf_nr = buf
+  
+  if is_running() then
+    -- Restart: stop current instance and start new one with potentially different args
+    local old_job_id = M.state.job_id
+    M.state.job_id = nil
+    if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+      vim.api.nvim_win_close(M.state.win_id, true)
+    end
+    M.state.win_id = nil
+    
+    -- Stop the old job and wait for it to exit before starting new one
+    vim.fn.jobstop(old_job_id)
+    vim.notify("Restarting aider", vim.log.levels.INFO, { title = "nvaider" })
+    
+    -- Use a timer to ensure the old process has time to exit
+    local restart_timer = vim.uv.new_timer()
+    restart_timer:start(100, 0, vim.schedule_wrap(function()
+      restart_timer:stop()
+      restart_timer:close()
+      do_start()
+    end))
+  else
+    do_start()
+  end
 end
 
 function M.stop()
