@@ -296,11 +296,15 @@ function M.dispatch(sub, args)
   if sub == 'start' then
     M.start(args)
   elseif sub == 'launch' then
-    -- prepopulate the prompt for args overriding with the current/default args. ai!
-    handle_user_input(function(input)
+    local current_args = table.concat(M.config.args, ' ')
+    vim.ui.input({
+      prompt = 'aider args> ',
+      default = current_args
+    }, function(input)
+      if not input then return end
       local launch_args = vim.fn.split(input)
       M.start(launch_args)
-    end, 'aider args> ')
+    end)
   elseif sub == 'stop' then
     M.stop()
   elseif sub == 'toggle' then
