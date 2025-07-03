@@ -105,6 +105,10 @@ function M.start(args_override)
 
   local function do_start()
     local buf = vim.api.nvim_create_buf(false, true)
+    -- treat empty args_override as nil
+    if args_override ~= nil and #args_override == 0 then
+      args_override = nil
+    end
     local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
     vim.api.nvim_buf_call(buf, function()
       M.state.job_id = vim.fn.jobstart(args, {
