@@ -138,7 +138,9 @@ function M.start(args_override)
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = M.state.job_id
     M.state.job_id = nil
+    -- if window was showing (same check as below) at this point, then re-open the window before do_start() called below. ai!
     if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+      -- ai: no need to close the window explicitly, since this is handled by on_exit in the jobstart params
       vim.api.nvim_win_close(M.state.win_id, true)
     end
     M.state.win_id = nil
