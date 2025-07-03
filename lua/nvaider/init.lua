@@ -150,13 +150,16 @@ function M.start(args_override)
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = M.state.job_id
     local was_window_showing = M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id)
+    if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+      vim.api.nvim_win_close(M.state.win_id, true)
+    end
     reset_state()
 
     -- Stop the old job and wait for it to exit before starting new one
     if old_job_id then
       vim.fn.jobstop(old_job_id)
     end
-    notify("Restarting aider")
+    notify("Restart trigerred…")
 
     -- Poll until the job actually exits, then start new one
     local function wait_for_exit()
@@ -168,7 +171,7 @@ function M.start(args_override)
             -- Job still running, keep waiting
             return
           end
-          
+
           -- Job has exited, clean up timer and start new instance
           restart_timer:stop()
           restart_timer:close()
@@ -179,7 +182,7 @@ function M.start(args_override)
         end))
       end
     end
-    
+
     wait_for_exit()
   else
     do_start()
