@@ -30,7 +30,8 @@ require("lazy").setup({
       { mode = "x", "<leader>a?", function () require("nvaider").dispatch("ask") end, desc = "Ask aider", noremap = true, silent = true },
       { mode = "n", "<leader>ac", ":Aider commit<cr>", desc = "Commit changes with aider", noremap = true, silent = true },
       { mode = "n", "<leader>af", ":Aider focus<cr>", desc = "Focus input on aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a!", ":Aider start<cr>", desc = "Start aider (background)", noremap = true, silent = true },
+      { mode = "n", "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider (background)", noremap = true, silent = true },
+      { mode = "n", "<leader>a!", ":Aider launch<cr>", desc = "Start aider with arg overrides", noremap = true, silent = true },
       { mode = "n", "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider", noremap = true, silent = true },
       { mode = "n", "<leader>ax", ":Aider abort<cr>", desc = "Send C-c to aider", noremap = true, silent = true },
     }
