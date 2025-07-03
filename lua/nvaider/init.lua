@@ -97,8 +97,7 @@ local function debounce_check()
   end))
 end
 
--- ai: modify to take an optional parameter, which is the same type as the M.config.args, that overrides the args sent to the aider process
-function M.start()
+function M.start(args_override)
   if M._starting then
     return
   end
@@ -109,8 +108,7 @@ function M.start()
     return
   end
   local buf = vim.api.nvim_create_buf(false, true)
-  -- ai: the args override should probably happen here?
-  local args = vim.list_extend({ M.config.cmd }, M.config.args)
+  local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
   vim.api.nvim_buf_call(buf, function()
     M.state.job_id = vim.fn.jobstart(args, {
       term = true,
@@ -266,11 +264,12 @@ function M.dispatch(sub, args)
   end
 
   if sub == 'start' then
-    -- ai: if there are args provided to M.dispatch, provide them to the M.start call here.
-    -- ai: the goal is to allow the user to run ":Aider start --model azure/o4-mini --watch-files" for example, overriding the configured default args set in lazyvim opts
-    M.start()
-    -- ai:also add another subcommand that uses handle_user_input to prompt for args to pass to M.start. A string split by space might be needed?
-    -- I can't think of a good subcommand name for this new one, so suggest a good one and implement it. ai!
+    M.start(args)
+  elseif sub == 'launch' then
+    handle_user_input(function(input)
+      local launch_args = vim.fn.split(input)
+      M.start(launch_args)
+    end, 'aider args> ')
   elseif sub == 'stop' then
     M.stop()
   elseif sub == 'toggle' then
@@ -317,7 +316,7 @@ function M.setup(opts)
     nargs = '*',
     range = true,
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'stop', 'toggle', 'add', 'read', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+      local subs = { 'start', 'launch', 'stop', 'toggle', 'add', 'read', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })
