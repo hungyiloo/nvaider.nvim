@@ -51,6 +51,17 @@ local function get_terminal_width()
   return math.floor(vim.o.columns * 0.35)
 end
 
+local function close_window()
+  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+    vim.api.nvim_win_close(M.state.win_id, true)
+    M.state.win_id = nil
+  end
+end
+
+local function is_window_showing()
+  return M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id)
+end
+
 local function open_window(enter_insert)
   local current_win = vim.api.nvim_get_current_win()
   vim.cmd('rightbelow vsplit')
@@ -134,9 +145,7 @@ function M.start(args_override)
           debounce_check()
         end,
         on_exit = function()
-          if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-            vim.api.nvim_win_close(M.state.win_id, true)
-          end
+          close_window()
           reset_state()
         end,
       })
@@ -149,10 +158,8 @@ function M.start(args_override)
   if is_running() then
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = M.state.job_id
-    local was_window_showing = M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id)
-    if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-      vim.api.nvim_win_close(M.state.win_id, true)
-    end
+    local was_window_showing = is_window_showing()
+    close_window()
     reset_state()
 
     -- Stop the old job and wait for it to exit before starting new one
@@ -192,21 +199,18 @@ end
 function M.stop()
   if not M.state.job_id then return end
   vim.fn.jobstop(M.state.job_id)
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-    vim.api.nvim_win_close(M.state.win_id, true)
-  end
+  close_window()
   reset_state()
   notify("Stopped aider")
 end
 
 function M.toggle()
   if not ensure_running() then return end
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-    vim.api.nvim_win_close(M.state.win_id, true)
-    M.state.win_id = nil
+  if is_window_showing() then
+    close_window()
   else
-  local current_win = open_window(false)
-  vim.api.nvim_set_current_win(current_win)
+    local current_win = open_window(false)
+    vim.api.nvim_set_current_win(current_win)
   end
 end
 
@@ -268,21 +272,18 @@ end
 
 function M.show()
   if not ensure_running() then return end
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then return end
+  if is_window_showing() then return end
   local current_win = open_window(false)
   vim.api.nvim_set_current_win(current_win)
 end
 
 function M.hide()
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-    vim.api.nvim_win_close(M.state.win_id, true)
-    M.state.win_id = nil
-  end
+  close_window()
 end
 
 function M.focus()
   if not ensure_running() then return end
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
+  if is_window_showing() then
     vim.api.nvim_set_current_win(M.state.win_id)
     vim.cmd('startinsert')
   else
