@@ -13,7 +13,8 @@ require("lazy").setup({
     opts = {
       -- The aider binary or command to run
       cmd = "aider",
-      -- Additional arguments passed to the aider CLI
+      -- Additional arguments passed to the aider CLI.
+      -- These are the defaults, but you can ":Aider launch" with overrides.
       args = { "--model", "sonnet", "--watch-files" },
     },
     -- optional key mappings
