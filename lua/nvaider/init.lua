@@ -149,7 +149,7 @@ function M.start(args_override)
           reset_state()
         end,
       })
-      notify("Starting aider")
+      notify("Starting " .. table.concat(args, ' '))
       M._starting = false
     end)
     M.state.buf_nr = buf
