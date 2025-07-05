@@ -66,15 +66,35 @@ local function is_running()
 end
 
 -- ensure the aider process is running
-local function ensure_running()
-  if not is_running() then
-    M.start()
-    if not is_running() then
-      notify("Aider could not start", vim.log.levels.ERROR)
-      return false
-    end
+local function ensure_running(callback)
+  if is_running() then
+    callback(true)
+    return
   end
-  return true
+
+  -- Start aider and wait for it to actually start
+  M.start()
+
+  -- Poll until job is running or timeout
+  local attempts = 0
+  local max_attempts = 50 -- 5 seconds max
+  local check_timer = vim.uv.new_timer()
+
+  if not check_timer then return end
+  check_timer:start(100, 100, vim.schedule_wrap(function()
+    attempts = attempts + 1
+
+    if is_running() then
+      check_timer:stop()
+      check_timer:close()
+      callback(true)
+    elseif attempts >= max_attempts then
+      check_timer:stop()
+      check_timer:close()
+      notify("Aider could not start", vim.log.levels.ERROR)
+      callback(false)
+    end
+  end))
 end
 
 local function get_terminal_width()
@@ -304,62 +324,80 @@ function M.toggle()
 end
 
 local function send_text_with_cr(text)
-  if not ensure_running() then return end
-  if text:find('\n') then
-    text = "{nvaider\n" .. text .. "\nnvaider}"
-  end
-  vim.fn.chansend(M.state.job_id, text .. '\n')
+  ensure_running(function(success)
+    if not success then return end
+    if text:find('\n') then
+      text = "{nvaider\n" .. text .. "\nnvaider}"
+    end
+    vim.fn.chansend(M.state.job_id, text .. '\n')
+  end)
 end
 
 function M.add()
-  if not ensure_running() then return end
-  local file = vim.fn.expand('%:p')
-  send_text_with_cr("/add " .. file)
-  notify("Added file: " .. file)
+  ensure_running(function(success)
+    if not success then return end
+    local file = vim.fn.expand('%:p')
+    send_text_with_cr("/add " .. file)
+    notify("Added file: " .. file)
+  end)
 end
 
 function M.read()
-  if not ensure_running() then return end
-  local file = vim.fn.expand('%:p')
-  send_text_with_cr("/read-only " .. file)
-  notify("Read-only file added: " .. file)
+  ensure_running(function(success)
+    if not success then return end
+    local file = vim.fn.expand('%:p')
+    send_text_with_cr("/read-only " .. file)
+    notify("Read-only file added: " .. file)
+  end)
 end
 
 function M.drop()
-  if not ensure_running() then return end
-  local file = vim.fn.expand('%:p')
-  send_text_with_cr("/drop " .. file)
-  notify("Dropped file: " .. file)
+  ensure_running(function(success)
+    if not success then return end
+    local file = vim.fn.expand('%:p')
+    send_text_with_cr("/drop " .. file)
+    notify("Dropped file: " .. file)
+  end)
 end
 
 function M.drop_all()
-  if not ensure_running() then return end
-  send_text_with_cr("/drop")
-  notify("All files dropped")
+  ensure_running(function(success)
+    if not success then return end
+    send_text_with_cr("/drop")
+    notify("All files dropped")
+  end)
 end
 
 function M.reset()
-  if not ensure_running() then return end
-  send_text_with_cr("/reset")
+  ensure_running(function(success)
+    if not success then return end
+    send_text_with_cr("/reset")
+  end)
 end
 
 function M.abort()
-  if not ensure_running() then return end
-  vim.fn.chansend(M.state.job_id, "\003") -- Ctrl+C
-  notify("Sent abort signal to aider")
+  ensure_running(function(success)
+    if not success then return end
+    vim.fn.chansend(M.state.job_id, "\003") -- Ctrl+C
+    notify("Sent abort signal to aider")
+  end)
 end
 
 function M.commit()
-  if not ensure_running() then return end
-  send_text_with_cr("/commit")
-  notify("Committed changes")
+  ensure_running(function(success)
+    if not success then return end
+    send_text_with_cr("/commit")
+    notify("Committed changes")
+  end)
 end
 
 function M.show()
-  if not ensure_running() then return end
-  if is_window_showing() then return end
-  local current_win = open_window(false)
-  vim.api.nvim_set_current_win(current_win)
+  ensure_running(function(success)
+    if not success then return end
+    if is_window_showing() then return end
+    local current_win = open_window(false)
+    vim.api.nvim_set_current_win(current_win)
+  end)
 end
 
 function M.hide()
@@ -367,13 +405,15 @@ function M.hide()
 end
 
 function M.focus()
-  if not ensure_running() then return end
-  if is_window_showing() then
-    vim.api.nvim_set_current_win(M.state.win_id)
-    vim.cmd('startinsert')
-  else
-    open_window(true)
-  end
+  ensure_running(function(success)
+    if not success then return end
+    if is_window_showing() then
+      vim.api.nvim_set_current_win(M.state.win_id)
+      vim.cmd('startinsert')
+    else
+      open_window(true)
+    end
+  end)
 end
 
 function M.rewrite_args()
