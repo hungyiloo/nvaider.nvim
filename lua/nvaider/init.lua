@@ -126,7 +126,7 @@ local function handle_stdout_prompt(data)
     -- detect unanswered questions based on yes/no pattern and an ending colon
     if (accumulated_text:match("%(Y%)") or accumulated_text:match("%(N%)")) and accumulated_text:match(":") then
       has_question = true
-      question_text = accumulated_text -- help me trim the question_text of any leading and trailing whitespace, including new lines and any other non-ascii whitespace characters. ai!
+      question_text = accumulated_text:gsub("^%s*", ""):gsub("%s*$", "")
     end
   end
 
