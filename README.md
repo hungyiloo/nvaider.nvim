@@ -1,10 +1,10 @@
 # 🤖 `nvaider.nvim`
 
-> [!WARNING] 
+> [!NOTE] 
 > This project is still under active development and the interfaces are unstable and may change. 
-> However, it is more than usable, with many of the commits in this repo being made using nvaider.nvim itself.
+> However, it is more than usable, with many of the commits in this repo being made using itself.
 
-A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauthier/aider) - the AI pair programming tool - directly into your editor. Run aider in a side terminal, manage tracked files, and send commands without leaving Neovim.
+A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauthier/aider) -- the AI pair programming tool -- directly into your editor. Run aider in a side terminal, manage tracked files, and send commands without leaving Neovim.
 
 ![screenshot](https://github.com/user-attachments/assets/d9df533a-2c11-44b2-8279-c4e8f828c68e)
 
@@ -20,9 +20,9 @@ A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauth
 
 ## Installation
 
-Prerequisites:
-- [aider](https://github.com/paul-gauthier/aider) installed and available in your PATH
-- Neovim 0.8+ (uses `vim.ui.input` and `vim.notify`)
+> [!IMPORTANT]
+> - [aider](https://github.com/paul-gauthier/aider) must be installed and available in your PATH
+> - Neovim must be on version 0.11+ 
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
@@ -30,6 +30,8 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 require("lazy").setup({
   {
     "hungyiloo/nvaider.nvim",
+
+    -- nvaider will work without any configured opts, especially if you have an aider YAML/env setup
     opts = {
       -- The aider binary or command to run (default: "aider")
       cmd = "aider",
@@ -46,6 +48,8 @@ require("lazy").setup({
         minimal = {}
       },
     },
+
+    -- These are just suggested key mappings. Feel free to ignore.
     keys = {
       -- Essential mappings
       { "<leader>a<space>", ":Aider toggle<cr>", desc = "Toggle aider window" },
