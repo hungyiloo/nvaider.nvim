@@ -118,18 +118,15 @@ local function handle_stdout_prompt(data)
 
   for _, line in ipairs(data) do
     -- strip ANSI escape/control characters from terminal output
-    local clean_line = line:gsub("\n", ""):gsub("\27%[%??[0-9;]*[ABCDHJKlmsu]", "")
-    if #clean_line > 0 then
-      clean_line = string.sub(clean_line, 1, #clean_line - 1) -- last character of the line seems to be junk
-    end
-    
+    local clean_line = line:gsub("\27%[%??[0-9;]*[ABCDHJKlmsuh]", "")
+
     -- accumulate text across lines
-    accumulated_text = accumulated_text .. clean_line
-    
+    accumulated_text = accumulated_text .. "\n" .. clean_line
+
     -- detect unanswered questions based on yes/no pattern and an ending colon
     if (accumulated_text:match("%(Y%)") or accumulated_text:match("%(N%)")) and accumulated_text:match(":") then
       has_question = true
-      question_text = accumulated_text
+      question_text = accumulated_text -- help me trim the question_text of any leading and trailing whitespace, including new lines and any other non-ascii whitespace characters. ai!
     end
   end
 
