@@ -165,6 +165,7 @@ function M.start(args_override)
       start_with_args(args_override)
     else
       local profile_names = vim.tbl_keys(M.config.profiles)
+      table.sort(profile_names)
       if #profile_names == 1 then
         -- Only one profile, use it directly
         start_with_args(M.config.profiles[profile_names[1]])
