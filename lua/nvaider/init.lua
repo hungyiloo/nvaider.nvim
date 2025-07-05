@@ -118,6 +118,7 @@ local function handle_stdout_prompt(data)
 
   for _, line in ipairs(data) do
     -- strip ANSI escape/control characters from terminal output
+    -- my intention was to combine the last 2 lines into `text`, in case the questions were split onto two lines, but for some reason `text` only contains the last line still. What could be the issue? ai!
     local text = (last_line .. line):gsub("\n", ""):gsub("\27%[%??[0-9;]*[ABCDHJKlmsu]", "")
     text = string.sub(text, 1, #text - 1) -- last character of the line seems to be junk
 
