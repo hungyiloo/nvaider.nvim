@@ -407,7 +407,7 @@ local function dispatch(sub, args)
     end
     M.start(args)
   elseif sub == 'rewrite_args' then
-    M.rewrite_args(args)
+    M.rewrite_args()
   elseif sub == 'stop' then
     M.stop()
   elseif sub == 'toggle' then
