@@ -2,6 +2,8 @@
 
 A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands.
 
+![screenshot](https://github.com/user-attachments/assets/d9df533a-2c11-44b2-8279-c4e8f828c68e)
+
 ## Installation
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
