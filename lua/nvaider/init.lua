@@ -153,12 +153,12 @@ function M.start(args_override)
       M._starting = false
     end)
     M.state.buf_nr = buf
+    M.show()
   end
 
   if is_running() then
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = M.state.job_id
-    local was_window_showing = is_window_showing()
     close_window()
     reset_state()
 
@@ -183,9 +183,6 @@ function M.start(args_override)
           restart_timer:stop()
           restart_timer:close()
           do_start()
-          if was_window_showing then
-            open_window(false)
-          end
         end))
       end
     end
@@ -205,12 +202,15 @@ function M.stop()
 end
 
 function M.toggle()
-  if not ensure_running() then return end
-  if is_window_showing() then
-    close_window()
+  if not is_running() then
+    M.start()
   else
-    local current_win = open_window(false)
-    vim.api.nvim_set_current_win(current_win)
+    if is_window_showing() then
+      close_window()
+    else
+      local current_win = open_window(false)
+      vim.api.nvim_set_current_win(current_win)
+    end
   end
 end
 

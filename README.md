@@ -31,7 +31,7 @@ require("lazy").setup({
       { mode = "x", "<leader>a?", function () require("nvaider").dispatch("ask") end, desc = "Ask aider", noremap = true, silent = true },
       { mode = "n", "<leader>ac", ":Aider commit<cr>", desc = "Commit changes with aider", noremap = true, silent = true },
       { mode = "n", "<leader>af", ":Aider focus<cr>", desc = "Focus input on aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider (background)", noremap = true, silent = true },
+      { mode = "n", "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider", noremap = true, silent = true },
       { mode = "n", "<leader>a!", ":Aider launch<cr>", desc = "Start aider with arg overrides", noremap = true, silent = true },
       { mode = "n", "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider", noremap = true, silent = true },
       { mode = "n", "<leader>ax", ":Aider abort<cr>", desc = "Send C-c to aider", noremap = true, silent = true },
@@ -49,7 +49,7 @@ The plugin defines a single user command:
 Available subcommands:
 
 - 🚀 `start`  
-  Starts aider in a hidden terminal buffer (use with aider's [`--watch-files`](https://aider.chat/docs/usage/watch.html)).  
+  Starts aider.
 - 🚀 `launch`  
   Prompts for custom aider arguments and starts aider with those arguments.  
 - 🛑 `stop`  
