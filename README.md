@@ -63,14 +63,16 @@ The plugin defines a single user command:
 
   `:Aider <subcommand> <optional input text>`
 
-Available subcommands:
+Subcommands:
 
 - 🚀 `start [arg overrides]`  
   Starts aider. If multiple profiles are configured, prompts you to select one.
-- 🚀 `rewrite_args`  
-  Prompts you for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
 - 🛑 `stop`  
   Stops aider process and closes any open window.  
+- ♻️ `reset`  
+  Sends `/reset` to aider, clearing all state.  
+- 🚫 `abort`  
+  Sends an abort signal (Ctrl+C) to the running aider process.  
 - 🔄 `toggle`  
   Toggles a side window displaying aider terminal.  
 - 👀 `show`  
@@ -87,16 +89,14 @@ Available subcommands:
   Sends `/drop <current-file-path>` to aider.  
 - 🗑️ `drop_all`  
   Sends `/drop` to aider, removing all tracked files.  
-- ♻️ `reset`  
-  Sends `/reset` to aider, clearing all state.  
-- 🚫 `abort`  
-  Sends an abort signal (Ctrl+C) to the running aider process.  
-- ✅ `commit`  
-  Sends `/commit` to aider and notifies on completion.  
 - 📤 `send [text]`  
   Sends arbitrary text. If no text is provided, prompts you for input.  
 - ❓ `ask [text]`  
   Sends `/ask <text>` to aider. If no text is provided, prompts you for input.  
+- ✅ `commit`  
+  Sends `/commit` to aider and notifies on completion.  
+- 🖥️ `rewrite_args`  
+  Prompts you for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
 
 Tab completion for subcommands is available when typing `:Aider ` and pressing `<Tab>`.
 
