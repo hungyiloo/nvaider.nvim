@@ -164,8 +164,7 @@ end
 local function scroll_to_latest()
   if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
     if vim.api.nvim_get_current_win() ~= M.state.win_id then
-      -- suppress any errors arising from the following line. it's a best effort to scroll to the bottom, but it's ok if it doesn't work in the edge cases. ai!
-      vim.api.nvim_win_call(M.state.win_id, function() vim.cmd('normal! G') end)
+      pcall(vim.api.nvim_win_call, M.state.win_id, function() vim.cmd('normal! G') end)
     end
   end
 end
