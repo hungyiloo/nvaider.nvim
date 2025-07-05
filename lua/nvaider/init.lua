@@ -106,6 +106,7 @@ local function open_window(enter_insert)
   return current_win
 end
 
+-- ai: I want the question notification to show up only when the question is detected and no other non-question lines have been received after the question in a 500ms window. ai!
 -- debounce state for question notifications (in ms)
 local last_question_notify = 0
 local QUESTION_DEBOUNCE_MS = 1000
@@ -120,7 +121,7 @@ local function handle_stdout_prompt(data)
     if (text:match("%(Y%)") or text:match("%(N%)")) and text:match(":") then
       local now = vim.loop.now()
       if now - last_question_notify > QUESTION_DEBOUNCE_MS then
-        notify("Aider might have a question for you. :Aider focus to answer it.")
+        notify("Aider might have a question for you.\n" .. text .. "\nUse :Aider send or focus to answer it.")
         last_question_notify = now
       end
     end
