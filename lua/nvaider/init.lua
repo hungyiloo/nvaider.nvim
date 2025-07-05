@@ -166,12 +166,15 @@ function M.start(args_override)
     if args_override then
       start_with_args(args_override)
     else
-      -- ensure this section still works if config.profiles is not defined, or is empty. ai!
-      local profile_names = vim.tbl_keys(M.config.profiles)
+      local profiles = M.config.profiles or {}
+      local profile_names = vim.tbl_keys(profiles)
       table.sort(profile_names)
-      if #profile_names == 1 then
+      if #profile_names == 0 then
+        -- No profiles defined, use empty args
+        start_with_args({})
+      elseif #profile_names == 1 then
         -- Only one profile, use it directly
-        start_with_args(M.config.profiles[profile_names[1]])
+        start_with_args(profiles[profile_names[1]])
       else
         -- Multiple profiles, let user select
         vim.ui.select(profile_names, {
@@ -181,7 +184,7 @@ function M.start(args_override)
             M._starting = false
             return
           end
-          start_with_args(M.config.profiles[choice])
+          start_with_args(profiles[choice])
         end)
       end
     end
