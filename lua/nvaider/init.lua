@@ -1,9 +1,9 @@
 local M = {
   config = {
     cmd = "aider",
-    -- ai: instead of one set of default args, I'd like to define zero or more "profiles", where each profile is a list of args to pass to aider
-    -- ai: make the corresponding changes in README.md too
-    args = {},
+    profiles = {
+      default = {},
+    },
   },
   state = {
     last_args = nil,
@@ -136,29 +136,51 @@ function M.start(args_override)
     if args_override ~= nil and #args_override == 0 then
       args_override = nil
     end
-    -- ai: consider using vim.ui.select here to list out the profiles by name, and let the user select which one to proceed with. ai!
-    local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
-    M.last_args = args
-    vim.api.nvim_buf_call(buf, function()
-      M.state.job_id = vim.fn.jobstart(args, {
-        term = true,
-        width = get_terminal_width(),
-        cwd = vim.fn.getcwd(),
-        on_stdout = function(_, data, _)
-          handle_stdout_prompt(data)
-          scroll_to_latest()
-          debounce_check()
-        end,
-        on_exit = function()
-          close_window()
-          reset_state()
-        end,
-      })
-      notify("Starting " .. table.concat(args, ' '))
-      M._starting = false
-    end)
-    M.state.buf_nr = buf
-    M.show()
+    local function start_with_args(final_args)
+      local args = vim.list_extend({ M.config.cmd }, final_args)
+      M.last_args = args
+      vim.api.nvim_buf_call(buf, function()
+        M.state.job_id = vim.fn.jobstart(args, {
+          term = true,
+          width = get_terminal_width(),
+          cwd = vim.fn.getcwd(),
+          on_stdout = function(_, data, _)
+            handle_stdout_prompt(data)
+            scroll_to_latest()
+            debounce_check()
+          end,
+          on_exit = function()
+            close_window()
+            reset_state()
+          end,
+        })
+        notify("Starting " .. table.concat(args, ' '))
+        M._starting = false
+      end)
+      M.state.buf_nr = buf
+      M.show()
+    end
+
+    if args_override then
+      start_with_args(args_override)
+    else
+      local profile_names = vim.tbl_keys(M.config.profiles)
+      if #profile_names == 1 then
+        -- Only one profile, use it directly
+        start_with_args(M.config.profiles[profile_names[1]])
+      else
+        -- Multiple profiles, let user select
+        vim.ui.select(profile_names, {
+          prompt = 'Select nvaider profile:',
+        }, function(choice)
+          if not choice then
+            M._starting = false
+            return
+          end
+          start_with_args(M.config.profiles[choice])
+        end)
+      end
+    end
   end
 
   if is_running() then

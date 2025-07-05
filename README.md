@@ -13,9 +13,13 @@ require("lazy").setup({
     opts = {
       -- The aider binary or command to run
       cmd = "aider",
-      -- Additional arguments passed to the aider CLI.
-      -- These are the defaults, but you can ":Aider launch" with overrides.
-      args = { "--model", "sonnet", "--watch-files" },
+      -- Define named profiles with different argument sets
+      profiles = {
+        default = { "--model", "sonnet", "--watch-files" },
+        claude = { "--model", "claude-3-5-sonnet-20241022", "--watch-files" },
+        gpt4 = { "--model", "gpt-4o", "--watch-files" },
+        local = { "--model", "ollama/qwen2.5-coder:32b" },
+      },
     },
     -- optional key mappings
     keys = {
@@ -49,7 +53,7 @@ The plugin defines a single user command:
 Available subcommands:
 
 - 🚀 `start`  
-  Starts aider.
+  Starts aider. If multiple profiles are configured, prompts you to select one.
 - 🚀 `launch`  
   Prompts for custom aider arguments and starts aider with those arguments.  
 - 🛑 `stop`  
@@ -85,10 +89,10 @@ Tab completion for subcommands is available when typing `:Aider ` and pressing `
 
 ## Configuration Options
 
-| Option | Type   | Default        | Description                                 |
-| ------ | ------ | -------------- | ------------------------------------------- |
-| `cmd`  | string | `"aider"`      | The command or executable for aider.   |
-| `args` | list   | `{} `          | List of extra CLI arguments to pass on start.|
+| Option     | Type   | Default                    | Description                                 |
+| ---------- | ------ | -------------------------- | ------------------------------------------- |
+| `cmd`      | string | `"aider"`                  | The command or executable for aider.       |
+| `profiles` | table  | `{ default = {} }`         | Named profiles with different argument sets.|
 
 You can override these in your `lazy.nvim` setup under the `opts` table.
 
