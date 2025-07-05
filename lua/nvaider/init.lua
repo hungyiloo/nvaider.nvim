@@ -19,6 +19,33 @@ local function notify(message, level)
   vim.notify(message, level or vim.log.levels.INFO, { title = "nvaider" })
 end
 
+local function handle_user_input(cmd_fn, prompt, args)
+  local txt = table.concat(args or {}, ' ')
+  if txt == '' then
+    local mode = vim.fn.mode()
+    if mode == 'v' or mode == 'V' or mode == '\22' then
+      local esc = vim.api.nvim_replace_termcodes('<esc>', true, false, true)
+      vim.api.nvim_feedkeys(esc, 'x', false)
+      local bufnr = vim.api.nvim_get_current_buf()
+      local _, from_row, from_col = unpack(vim.fn.getpos("'<"))
+      local _, to_row, to_col = unpack(vim.fn.getpos("'>"))
+      from_col = from_col - 1
+      from_row = from_row - 1
+      to_col = math.min(to_col, string.len(vim.fn.getline(to_row)))
+      to_row = to_row - 1
+      local text = vim.api.nvim_buf_get_text(bufnr, from_row, from_col, to_row, to_col, {})
+      cmd_fn(table.concat(text, '\n'))
+    else
+      vim.ui.input({ prompt = prompt }, function(input)
+        if not input or input == '' then return end
+        cmd_fn(input)
+      end)
+    end
+  else
+    cmd_fn(txt)
+  end
+end
+
 local function reset_state()
   M.state.job_id = nil
   M.state.buf_nr = nil
@@ -134,8 +161,8 @@ function M.start(args_override)
     local buf = vim.api.nvim_create_buf(false, true)
 
     local function start_with_args(final_args)
+      M.last_args = final_args
       local args = vim.list_extend({ M.config.cmd }, final_args)
-      M.last_args = args
       vim.api.nvim_buf_call(buf, function()
         M.state.job_id = vim.fn.jobstart(args, {
           term = true,
@@ -248,16 +275,12 @@ function M.toggle()
   end
 end
 
-function M.send(text)
+local function send(text)
   if not ensure_running() then return end
   if text:find('\n') then
     text = "{nvaider\n" .. text .. "\nnvaider}"
   end
   vim.fn.chansend(M.state.job_id, text .. '\n')
-end
-
-function M.ask(text)
-  M.send('/ask ' .. text)
 end
 
 function M.add()
@@ -325,46 +348,39 @@ function M.focus()
   end
 end
 
-function M.dispatch(sub, args)
-  local function handle_user_input(cmd_fn, prompt)
-    local txt = table.concat(args or {}, ' ')
-    if txt == '' then
-      local mode = vim.fn.mode()
-      if mode == 'v' or mode == 'V' or mode == '\22' then
-        local esc = vim.api.nvim_replace_termcodes('<esc>', true, false, true)
-        vim.api.nvim_feedkeys(esc, 'x', false)
-        local bufnr = vim.api.nvim_get_current_buf()
-        local _, from_row, from_col = unpack(vim.fn.getpos("'<"))
-        local _, to_row, to_col = unpack(vim.fn.getpos("'>"))
-        from_col = from_col - 1
-        from_row = from_row - 1
-        to_col = math.min(to_col, string.len(vim.fn.getline(to_row)))
-        to_row = to_row - 1
-        local text = vim.api.nvim_buf_get_text(bufnr, from_row, from_col, to_row, to_col, {})
-        cmd_fn(table.concat(text, '\n'))
-      else
-        vim.ui.input({ prompt = prompt }, function(input)
-          if not input or input == '' then return end
-          cmd_fn(input)
-        end)
-      end
-    else
-      cmd_fn(txt)
-    end
+function M.launch(args)
+  if args ~= nil and #args == 0 then
+    args = nil
   end
 
-  if sub == 'start' then
+  if args then
     M.start(args)
-  elseif sub == 'launch' then
-    local current_args = table.concat(M.last_args or {}, ' ')
+  else
+  local current_args = table.concat(M.last_args or {}, ' ')
     vim.ui.input({
       prompt = 'aider args> ',
       default = current_args
     }, function(input)
-      if not input then return end
-      local launch_args = vim.fn.split(input)
-      M.start(launch_args)
-    end)
+        if not input then return end
+        local launch_args = vim.fn.split(input)
+        M.start(launch_args)
+      end)
+  end
+end
+
+function M.send(args)
+  handle_user_input(send, 'aider> ', args)
+end
+
+function M.ask(args)
+  handle_user_input(function (input) M.send('/ask ' .. input) end, 'ask aider> ', args)
+end
+
+local function dispatch(sub, args)
+  if sub == 'start' then
+    M.start(args)
+  elseif sub == 'launch' then
+    M.launch(args)
   elseif sub == 'stop' then
     M.stop()
   elseif sub == 'toggle' then
@@ -384,9 +400,9 @@ function M.dispatch(sub, args)
   elseif sub == 'commit' then
     M.commit()
   elseif sub == 'send' then
-    handle_user_input(M.send, 'aider> ')
+    M.send(args)
   elseif sub == 'ask' then
-    handle_user_input(M.ask, 'ask aider> ')
+    M.ask(args)
   elseif sub == 'show' then
     M.show()
   elseif sub == 'focus' then
@@ -406,7 +422,7 @@ function M.setup(opts)
     local args = vim.fn.split(cmd_opts.args)
     local sub = args[1]
     table.remove(args, 1)
-    M.dispatch(sub, args)
+    dispatch(sub, args)
   end, {
     nargs = '*',
     range = true,
