@@ -4,111 +4,194 @@
 > This project is still under active development and the interfaces are unstable and may change. 
 > However, it is more than usable, with many of the commits in this repo being made using nvaider.nvim itself.
 
-A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands. Written from scratch using Aider, along with various models.
+A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauthier/aider) - the AI pair programming tool - directly into your editor. Run aider in a side terminal, manage tracked files, and send commands without leaving Neovim.
 
 ![screenshot](https://github.com/user-attachments/assets/d9df533a-2c11-44b2-8279-c4e8f828c68e)
 
+## Features
+
+- 🚀 **Single command interface** - Everything through `:Aider <subcommand>`
+- 📁 **Profile management** - Define different aider configurations for different workflows
+- 🖥️ **Integrated terminal** - Aider runs in a side window within Neovim
+- 📂 **File management** - Add, drop, and manage tracked files from within your editor
+- 💬 **Direct communication** - Send messages and questions to aider without switching contexts
+- 🔄 **Smart notifications** - Get notified when aider needs your attention
+- ⌨️ **Flexible input** - Send text via command args, prompts, or visual selections
+
 ## Installation
 
-Using [lazy.nvim](https://github.com/folke/lazy.nvim):
+### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 require("lazy").setup({
   {
     "hungyiloo/nvaider.nvim",
-
-    -- All opts are optional
     opts = {
-      -- The aider binary or command to run
+      -- The aider binary or command to run (default: "aider")
       cmd = "aider",
 
       -- Define named profiles with different argument sets
       profiles = {
-        -- If only one profile is defined, nvaider will automatically use it without asking
+        -- If only one profile is defined, nvaider will automatically use it
         default = { "--model", "sonnet", "--watch-files" },
 
-        -- Otherwise, you can add more profiles and nvaider will prompt you for a choice on each start
+        -- Multiple profiles will prompt you to choose on startup
         claude = { "--model", "claude-3-5-sonnet-20241022", "--cache-prompts", "--watch-files" },
         gpt4 = { "--model", "gpt-4o", "--watch-files", "--no-auto-commits" },
         ollama = { "--model", "ollama/qwen2.5-coder:32b" },
-        empty = {}
+        minimal = {}
       },
     },
-    -- optional key mappings
     keys = {
-      { mode = "n", "<leader>a<space>", ":Aider toggle<cr>", desc = "Toggle aider", noremap = true, silent = true },
-      { mode = "n", "<leader>aa", ":Aider add<cr>", desc = "Add file", noremap = true, silent = true },
-      { mode = "n", "<leader>ad", ":Aider drop<cr>", desc = "Drop file", noremap = true, silent = true },
-      { mode = "n", "<leader>ar", ":Aider read<cr>", desc = "Add read-only file", noremap = true, silent = true },
-      { mode = "n", "<leader>aD", ":Aider drop_all<cr>", desc = "Drop all files", noremap = true, silent = true },
-      { mode = "n", "<leader>aR", ":Aider reset<cr>", desc = "Reset aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a.", ":Aider send<cr>", desc = "Send to aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a?", ":Aider ask<cr>", desc = "Ask aider", noremap = true, silent = true },
-      { mode = "x", "<leader>a.", function () require("nvaider").send() end, desc = "Send to aider", noremap = true, silent = true },
-      { mode = "x", "<leader>a?", function () require("nvaider").ask() end, desc = "Ask aider", noremap = true, silent = true },
-      { mode = "n", "<leader>ac", ":Aider commit<cr>", desc = "Commit changes with aider", noremap = true, silent = true },
-      { mode = "n", "<leader>af", ":Aider focus<cr>", desc = "Focus input on aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a!", ":Aider rewrite_args<cr>", desc = "Start aider with arg overrides", noremap = true, silent = true },
-      { mode = "n", "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider", noremap = true, silent = true },
-      { mode = "n", "<leader>ax", ":Aider abort<cr>", desc = "Send C-c to aider", noremap = true, silent = true },
+      -- Essential mappings
+      { "<leader>a<space>", ":Aider toggle<cr>", desc = "Toggle aider window" },
+      { "<leader>aa", ":Aider add<cr>", desc = "Add current file to aider" },
+      { "<leader>a.", ":Aider send<cr>", desc = "Send message to aider" },
+      { "<leader>a?", ":Aider ask<cr>", desc = "Ask aider a question" },
+      
+      -- File management
+      { "<leader>ar", ":Aider read<cr>", desc = "Add file as read-only" },
+      { "<leader>ad", ":Aider drop<cr>", desc = "Drop current file" },
+      { "<leader>aD", ":Aider drop_all<cr>", desc = "Drop all files" },
+      
+      -- Instance management
+      { "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider" },
+      { "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider" },
+      { "<leader>af", ":Aider focus<cr>", desc = "Focus aider terminal" },
+      
+      -- Advanced
+      { "<leader>ac", ":Aider commit<cr>", desc = "Commit with aider" },
+      { "<leader>aR", ":Aider reset<cr>", desc = "Reset aider session" },
+      { "<leader>ax", ":Aider abort<cr>", desc = "Abort current operation" },
+      { "<leader>a!", ":Aider rewrite_args<cr>", desc = "Change aider arguments" },
+      
+      -- Visual mode mappings
+      { mode = "x", "<leader>a.", function() require("nvaider").send() end, desc = "Send selection to aider" },
+      { mode = "x", "<leader>a?", function() require("nvaider").ask() end, desc = "Ask about selection" },
     }
   },
 })
 ```
 
-## Usage
+### Prerequisites
 
-The plugin defines a single user command:
+- [aider](https://github.com/paul-gauthier/aider) installed and available in your PATH
+- Neovim 0.8+ (uses `vim.ui.input` and `vim.notify`)
 
-  `:Aider <subcommand> <optional input text>`
+## Quick Start
 
-Subcommands:
+1. **Start aider**: `:Aider start` (or use your configured keybinding)
+2. **Add files**: `:Aider add` to track the current file
+3. **Send messages**: `:Aider send` and type your request
+4. **Toggle window**: `:Aider toggle` to show/hide the aider terminal
 
-- 🚀 `start [arg overrides]`  
-  Starts aider. If multiple profiles are configured, prompts you to select one.
-- 🛑 `stop`  
-  Stops aider process and closes any open window.  
-- ♻️ `reset`  
-  Sends `/reset` to aider, clearing all state.  
-- 🚫 `abort`  
-  Sends an abort signal (Ctrl+C) to the running aider process.  
-- 🔄 `toggle`  
-  Toggles a side window displaying aider terminal.  
-- 👀 `show`  
-  Opens a side window displaying aider terminal.  
-- 🙈 `hide`  
-  Closes the side window displaying aider terminal.  
-- 🔍 `focus`  
-  Opens the side window displaying aider terminal and enters input mode.  
-- ➕ `add`  
-  Sends `/add <current-file-path>` to aider.  
-- 📖 `read`  
-  Sends `/read-only <current-file-path>` to aider, tracking the file in read-only mode.  
-- 🗑️ `drop`  
-  Sends `/drop <current-file-path>` to aider.  
-- 🗑️ `drop_all`  
-  Sends `/drop` to aider, removing all tracked files.  
-- 📤 `send [text]`  
-  Sends arbitrary text. If no text is provided, prompts you for input.  
-- ❓ `ask [text]`  
-  Sends `/ask <text>` to aider. If no text is provided, prompts you for input.  
-- ✅ `commit`  
-  Sends `/commit` to aider and notifies on completion.  
-- 🖥️ `rewrite_args`  
-  Prompts you for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
+## Usage Examples
 
-Tab completion for subcommands is available when typing `:Aider ` and pressing `<Tab>`.
+### Basic Workflow
+```vim
+:Aider start              " Start aider with your default profile
+:Aider add                " Add current file to aider's context
+:Aider send Fix the bug in the login function
+:Aider commit             " Commit the changes aider made
+```
 
-## Configuration Options
+### Working with Multiple Files
+```vim
+:Aider add                " Add current file
+" Switch to another file
+:Aider add                " Add this file too
+:Aider send Refactor these two files to use a shared utility
+```
+
+### Using Visual Selections
+```vim
+" Select some code in visual mode, then:
+<leader>a.                " Send the selected code with a message
+<leader>a?                " Ask a question about the selected code
+```
+
+## Command Reference
+
+All functionality is accessed through the `:Aider` command with subcommands:
+
+```
+:Aider <subcommand> [optional arguments]
+```
+
+Tab completion is available for all subcommands.
+
+### Managing the Aider Instance
+
+- **`start [args...]`** - Start aider with optional argument overrides. If multiple profiles are configured, you'll be prompted to choose one.
+- **`stop`** - Stop the aider process and close any open windows.
+- **`rewrite_args`** - Modify the arguments for the current aider session. Prompts for new arguments and restarts aider.
+
+### Window and Focus Management
+
+- **`toggle`** - Show or hide the aider terminal window.
+- **`show`** - Open the aider terminal window (if not already visible).
+- **`hide`** - Close the aider terminal window.
+- **`focus`** - Open the aider terminal window and enter insert mode for immediate typing.
+
+### Managing Tracked Files
+
+- **`add`** - Add the current file to aider's context for editing.
+- **`read`** - Add the current file as read-only (aider can see it but won't modify it).
+- **`drop`** - Remove the current file from aider's context.
+- **`drop_all`** - Remove all files from aider's context.
+
+### Sending Input to Aider
+
+- **`send [text]`** - Send a message to aider. If no text is provided, you'll be prompted to enter it. In visual mode, sends the selected text.
+- **`ask [text]`** - Send a question to aider using the `/ask` command. Prompts for input if no text provided.
+
+### Advanced Operations
+
+- **`commit`** - Tell aider to commit the current changes.
+- **`reset`** - Reset aider's conversation history and context.
+- **`abort`** - Send Ctrl+C to aider to interrupt the current operation.
+
+## Configuration
+
+### Options
 
 | Option     | Type   | Default                    | Description                                 |
 | ---------- | ------ | -------------------------- | ------------------------------------------- |
 | `cmd`      | string | `"aider"`                  | The command or executable for aider.       |
 | `profiles` | table  | `{ default = {} }`         | Named profiles with different argument sets.|
 
-You can override these in your `lazy.nvim` setup under the `opts` table.
+### Profile Examples
 
-## License
+Profiles let you define different aider configurations for different workflows:
 
-MIT
+```lua
+opts = {
+  profiles = {
+    -- Quick coding with Claude
+    claude = { "--model", "claude-3-5-sonnet-20241022", "--cache-prompts" },
+    
+    -- GPT-4 with auto-commits disabled
+    gpt4 = { "--model", "gpt-4o", "--no-auto-commits", "--watch-files" },
+    
+    -- Local model via Ollama
+    local = { "--model", "ollama/qwen2.5-coder:32b" },
+    
+    -- Minimal setup
+    basic = {},
+  }
+}
+```
+
+## Tips and Tricks
+
+- **Smart notifications**: nvaider detects when aider is asking questions and notifies you to check the terminal.
+- **Multi-line input**: When sending messages, you can include newlines. nvaider will automatically wrap them for aider.
+- **Visual selections**: Select code and use the send/ask commands to work with specific code snippets.
+- **File watching**: Use `--watch-files` in your profiles to have aider automatically detect file changes.
+- **Window management**: The aider terminal remembers its size and position between sessions.
+
+## Troubleshooting
+
+- **Aider won't start**: Check that `aider` is installed and in your PATH
+- **No response from aider**: Use `:Aider focus` to check if aider is waiting for input
+- **Window issues**: Try `:Aider stop` and `:Aider start` to reset the session
