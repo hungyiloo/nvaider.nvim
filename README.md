@@ -10,15 +10,22 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 require("lazy").setup({
   {
     "hungyiloo/nvaider.nvim",
+
+    -- All opts are optional
     opts = {
       -- The aider binary or command to run
       cmd = "aider",
+
       -- Define named profiles with different argument sets
       profiles = {
+        -- If only one profile is defined, nvaider will automatically use it without asking
         default = { "--model", "sonnet", "--watch-files" },
-        claude = { "--model", "claude-3-5-sonnet-20241022", "--watch-files" },
-        gpt4 = { "--model", "gpt-4o", "--watch-files" },
-        local = { "--model", "ollama/qwen2.5-coder:32b" },
+
+        -- Otherwise, you can add more profiles and nvaider will prompt you for a choice on each start
+        claude = { "--model", "claude-3-5-sonnet-20241022", "--cache-prompts", "--watch-files" },
+        gpt4 = { "--model", "gpt-4o", "--watch-files", "--no-auto-commits" },
+        ollama = { "--model", "ollama/qwen2.5-coder:32b" },
+        empty = {}
       },
     },
     -- optional key mappings
@@ -55,7 +62,7 @@ Available subcommands:
 - 🚀 `start`  
   Starts aider. If multiple profiles are configured, prompts you to select one.
 - 🚀 `launch`  
-  Prompts for custom aider arguments and starts aider with those arguments.  
+  Prompts for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
 - 🛑 `stop`  
   Stops aider process and closes any open window.  
 - 🔄 `toggle`  
