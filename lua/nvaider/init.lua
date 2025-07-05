@@ -304,7 +304,7 @@ function M.drop()
   notify("Dropped file: " .. file)
 end
 
-function M.dropall()
+function M.drop_all()
   if not ensure_running() then return end
   send_text_with_cr("/drop")
   notify("All files dropped")
@@ -348,7 +348,7 @@ function M.focus()
   end
 end
 
-function M.launch()
+function M.rewrite_args()
   local current_args = table.concat(M.last_args or {}, ' ')
   vim.ui.input(
     {
@@ -374,8 +374,8 @@ end
 local function dispatch(sub, args)
   if sub == 'start' then
     M.start(args)
-  elseif sub == 'launch' then
-    M.launch(args)
+  elseif sub == 'rewrite_args' then
+    M.rewrite_args(args)
   elseif sub == 'stop' then
     M.stop()
   elseif sub == 'toggle' then
@@ -386,8 +386,8 @@ local function dispatch(sub, args)
     M.read()
   elseif sub == 'drop' then
     M.drop()
-  elseif sub == 'dropall' then
-    M.dropall()
+  elseif sub == 'drop_all' then
+    M.drop_all()
   elseif sub == 'reset' then
     M.reset()
   elseif sub == 'abort' then
@@ -422,7 +422,7 @@ function M.setup(opts)
     nargs = '*',
     range = true,
     complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'launch', 'stop', 'toggle', 'add', 'read', 'drop', 'dropall', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+      local subs = { 'start', 'rewrite_args', 'stop', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
       return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
     end,
   })

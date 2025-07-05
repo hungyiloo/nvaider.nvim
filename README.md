@@ -40,7 +40,7 @@ require("lazy").setup({
       { mode = "n", "<leader>aa", ":Aider add<cr>", desc = "Add file", noremap = true, silent = true },
       { mode = "n", "<leader>ad", ":Aider drop<cr>", desc = "Drop file", noremap = true, silent = true },
       { mode = "n", "<leader>ar", ":Aider read<cr>", desc = "Add read-only file", noremap = true, silent = true },
-      { mode = "n", "<leader>aD", ":Aider dropall<cr>", desc = "Drop all files", noremap = true, silent = true },
+      { mode = "n", "<leader>aD", ":Aider drop_all<cr>", desc = "Drop all files", noremap = true, silent = true },
       { mode = "n", "<leader>aR", ":Aider reset<cr>", desc = "Reset aider", noremap = true, silent = true },
       { mode = "n", "<leader>a.", ":Aider send<cr>", desc = "Send to aider", noremap = true, silent = true },
       { mode = "n", "<leader>a?", ":Aider ask<cr>", desc = "Ask aider", noremap = true, silent = true },
@@ -49,7 +49,7 @@ require("lazy").setup({
       { mode = "n", "<leader>ac", ":Aider commit<cr>", desc = "Commit changes with aider", noremap = true, silent = true },
       { mode = "n", "<leader>af", ":Aider focus<cr>", desc = "Focus input on aider", noremap = true, silent = true },
       { mode = "n", "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider", noremap = true, silent = true },
-      { mode = "n", "<leader>a!", ":Aider launch<cr>", desc = "Start aider with arg overrides", noremap = true, silent = true },
+      { mode = "n", "<leader>a!", ":Aider rewrite_args<cr>", desc = "Start aider with arg overrides", noremap = true, silent = true },
       { mode = "n", "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider", noremap = true, silent = true },
       { mode = "n", "<leader>ax", ":Aider abort<cr>", desc = "Send C-c to aider", noremap = true, silent = true },
     }
@@ -67,7 +67,7 @@ Available subcommands:
 
 - 🚀 `start [arg overrides]`  
   Starts aider. If multiple profiles are configured, prompts you to select one.
-- 🚀 `launch`  
+- 🚀 `rewrite_args`  
   Prompts you for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
 - 🛑 `stop`  
   Stops aider process and closes any open window.  
@@ -85,7 +85,7 @@ Available subcommands:
   Sends `/read-only <current-file-path>` to aider, tracking the file in read-only mode.  
 - 🗑️ `drop`  
   Sends `/drop <current-file-path>` to aider.  
-- 🗑️ `dropall`  
+- 🗑️ `drop_all`  
   Sends `/drop` to aider, removing all tracked files.  
 - ♻️ `reset`  
   Sends `/reset` to aider, clearing all state.  
