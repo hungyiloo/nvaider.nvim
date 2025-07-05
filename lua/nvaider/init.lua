@@ -4,6 +4,7 @@ local M = {
     args = {},
   },
   state = {
+    last_args = nil,
     job_id = nil,
     buf_nr = nil,
     win_id = nil,
@@ -134,6 +135,7 @@ function M.start(args_override)
       args_override = nil
     end
     local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
+    M.last_args = args
     vim.api.nvim_buf_call(buf, function()
       M.state.job_id = vim.fn.jobstart(args, {
         term = true,
@@ -322,7 +324,7 @@ function M.dispatch(sub, args)
   if sub == 'start' then
     M.start(args)
   elseif sub == 'launch' then
-    local current_args = table.concat(M.config.args, ' ')
+    local current_args = table.concat(M.last_args or M.config.args, ' ')
     vim.ui.input({
       prompt = 'aider args> ',
       default = current_args
