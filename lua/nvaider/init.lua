@@ -275,7 +275,7 @@ function M.toggle()
   end
 end
 
-local function send(text)
+local function send_text_with_cr(text)
   if not ensure_running() then return end
   if text:find('\n') then
     text = "{nvaider\n" .. text .. "\nnvaider}"
@@ -286,33 +286,33 @@ end
 function M.add()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
-  M.send("/add " .. file)
+  send_text_with_cr("/add " .. file)
   notify("Added file: " .. file)
 end
 
 function M.read()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
-  M.send("/read-only " .. file)
+  send_text_with_cr("/read-only " .. file)
   notify("Read-only file added: " .. file)
 end
 
 function M.drop()
   if not ensure_running() then return end
   local file = vim.fn.expand('%:p')
-  M.send("/drop " .. file)
+  send_text_with_cr("/drop " .. file)
   notify("Dropped file: " .. file)
 end
 
 function M.dropall()
   if not ensure_running() then return end
-  M.send("/drop")
+  send_text_with_cr("/drop")
   notify("All files dropped")
 end
 
 function M.reset()
   if not ensure_running() then return end
-  M.send("/reset")
+  send_text_with_cr("/reset")
 end
 
 function M.abort()
@@ -323,7 +323,7 @@ end
 
 function M.commit()
   if not ensure_running() then return end
-  M.send("/commit")
+  send_text_with_cr("/commit")
   notify("Committed changes")
 end
 
@@ -348,32 +348,27 @@ function M.focus()
   end
 end
 
-function M.launch(args)
-  if args ~= nil and #args == 0 then
-    args = nil
-  end
-
-  if args then
-    M.start(args)
-  else
+function M.launch()
   local current_args = table.concat(M.last_args or {}, ' ')
-    vim.ui.input({
+  vim.ui.input(
+    {
       prompt = 'aider args> ',
       default = current_args
-    }, function(input)
-        if not input then return end
-        local launch_args = vim.fn.split(input)
-        M.start(launch_args)
-      end)
-  end
+    },
+    function(input)
+      if not input then return end
+      local launch_args = vim.fn.split(input)
+      M.start(launch_args)
+    end
+  )
 end
 
 function M.send(args)
-  handle_user_input(send, 'aider> ', args)
+  handle_user_input(send_text_with_cr, 'aider> ', args)
 end
 
 function M.ask(args)
-  handle_user_input(function (input) M.send('/ask ' .. input) end, 'ask aider> ', args)
+  handle_user_input(function (input) send_text_with_cr('/ask ' .. input) end, 'ask aider> ', args)
 end
 
 local function dispatch(sub, args)

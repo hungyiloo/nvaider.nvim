@@ -2,9 +2,9 @@
 
 > [!WARNING] 
 > This project is still under active development and the interfaces are unstable and may change. 
-> However, I dogfood this plugin every day for work purposes and it's stable under my usage patterns.
+> However, it is more than usable, with many of the commits in this repo being made using nvaider.nvim itself.
 
-A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands.
+A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands. Written from scratch using Aider, along with various models.
 
 ![screenshot](https://github.com/user-attachments/assets/d9df533a-2c11-44b2-8279-c4e8f828c68e)
 
@@ -61,14 +61,14 @@ require("lazy").setup({
 
 The plugin defines a single user command:
 
-  :Aider <subcommand> <optional input text>
+  `:Aider <subcommand> <optional input text>`
 
 Available subcommands:
 
-- 🚀 `start`  
+- 🚀 `start [arg overrides]`  
   Starts aider. If multiple profiles are configured, prompts you to select one.
 - 🚀 `launch`  
-  Prompts for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
+  Prompts you for custom aider arguments and starts aider with those arguments (use this to edit the current running args).  
 - 🛑 `stop`  
   Stops aider process and closes any open window.  
 - 🔄 `toggle`  
