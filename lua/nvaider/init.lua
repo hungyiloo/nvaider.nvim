@@ -1,6 +1,8 @@
 local M = {
   config = {
     cmd = "aider",
+    -- ai: instead of one set of default args, I'd like to define zero or more "profiles", where each profile is a list of args to pass to aider
+    -- ai: make the corresponding changes in README.md too
     args = {},
   },
   state = {
@@ -134,6 +136,7 @@ function M.start(args_override)
     if args_override ~= nil and #args_override == 0 then
       args_override = nil
     end
+    -- ai: consider using vim.ui.select here to list out the profiles by name, and let the user select which one to proceed with. ai!
     local args = vim.list_extend({ M.config.cmd }, args_override or M.config.args)
     M.last_args = args
     vim.api.nvim_buf_call(buf, function()
@@ -324,7 +327,7 @@ function M.dispatch(sub, args)
   if sub == 'start' then
     M.start(args)
   elseif sub == 'launch' then
-    local current_args = table.concat(M.last_args or M.config.args, ' ')
+    local current_args = table.concat(M.last_args or {}, ' ')
     vim.ui.input({
       prompt = 'aider args> ',
       default = current_args
