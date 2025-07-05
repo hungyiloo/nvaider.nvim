@@ -106,12 +106,16 @@ local function open_window(enter_insert)
   return current_win
 end
 
--- ai: I want the question notification to show up only when the question is detected and no other non-question lines have been received after the question in a 500ms window. ai!
--- debounce state for question notifications (in ms)
-local last_question_notify = 0
-local QUESTION_DEBOUNCE_MS = 1000
+-- debounce state for question notifications
+local pending_question = nil
+local question_timer = nil
+local QUESTION_DEBOUNCE_MS = 500
+
 local function handle_stdout_prompt(data)
   local last_line = ""
+  local has_question = false
+  local question_text = ""
+
   for _, line in ipairs(data) do
     -- strip ANSI escape/control characters from terminal output
     local text = (last_line .. line):gsub("\n", ""):gsub("\27%[%??[0-9;]*[ABCDHJKlmsu]", "")
@@ -119,13 +123,37 @@ local function handle_stdout_prompt(data)
 
     -- detect unanswered questions based on yes/no pattern and an ending colon
     if (text:match("%(Y%)") or text:match("%(N%)")) and text:match(":") then
-      local now = vim.loop.now()
-      if now - last_question_notify > QUESTION_DEBOUNCE_MS then
-        notify("Aider might have a question for you.\n" .. text .. "\nUse :Aider send or focus to answer it.")
-        last_question_notify = now
-      end
+      has_question = true
+      question_text = text
     end
     last_line = line
+  end
+
+  -- Cancel any existing timer
+  if question_timer then
+    question_timer:stop()
+    question_timer:close()
+    question_timer = nil
+  end
+
+  if has_question then
+    -- Store the question and start a timer
+    pending_question = question_text
+    question_timer = vim.uv.new_timer()
+    if not question_timer then return end
+    question_timer:start(QUESTION_DEBOUNCE_MS, 0, vim.schedule_wrap(function()
+      -- Timer expired, show the notification
+      if pending_question then
+        notify("Aider might have a question for you.\n\n" .. pending_question .. "\n\nUse :Aider send or focus to answer it.")
+        pending_question = nil
+      end
+      question_timer:stop()
+      question_timer:close()
+      question_timer = nil
+    end))
+  else
+    -- Non-question output received, cancel any pending question notification
+    pending_question = nil
   end
 end
 

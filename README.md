@@ -15,7 +15,6 @@ A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauth
 - 🖥️ **Integrated terminal** - Aider runs in a side window within Neovim
 - 📂 **File management** - Add, drop, and manage tracked files from within your editor
 - 💬 **Direct communication** - Send messages and questions to aider without switching contexts
-- 🔄 **Smart notifications** - Get notified when aider needs your attention
 - ⌨️ **Flexible input** - Send text via command args, prompts, or visual selections
 
 ## Installation
@@ -45,26 +44,26 @@ require("lazy").setup({
     keys = {
       -- Essential mappings
       { "<leader>a<space>", ":Aider toggle<cr>", desc = "Toggle aider window" },
-      { "<leader>aa", ":Aider add<cr>", desc = "Add current file to aider" },
       { "<leader>a.", ":Aider send<cr>", desc = "Send message to aider" },
       { "<leader>a?", ":Aider ask<cr>", desc = "Ask aider a question" },
-      
+
       -- File management
+      { "<leader>aa", ":Aider add<cr>", desc = "Add current file to aider" },
       { "<leader>ar", ":Aider read<cr>", desc = "Add file as read-only" },
       { "<leader>ad", ":Aider drop<cr>", desc = "Drop current file" },
       { "<leader>aD", ":Aider drop_all<cr>", desc = "Drop all files" },
-      
+
       -- Instance management
       { "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider" },
       { "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider" },
       { "<leader>af", ":Aider focus<cr>", desc = "Focus aider terminal" },
-      
+
       -- Advanced
       { "<leader>ac", ":Aider commit<cr>", desc = "Commit with aider" },
       { "<leader>aR", ":Aider reset<cr>", desc = "Reset aider session" },
       { "<leader>ax", ":Aider abort<cr>", desc = "Abort current operation" },
       { "<leader>a!", ":Aider rewrite_args<cr>", desc = "Change aider arguments" },
-      
+
       -- Visual mode mappings
       { mode = "x", "<leader>a.", function() require("nvaider").send() end, desc = "Send selection to aider" },
       { mode = "x", "<leader>a?", function() require("nvaider").ask() end, desc = "Ask about selection" },
@@ -105,9 +104,9 @@ require("lazy").setup({
 
 ### Using Visual Selections
 ```vim
-" Select some code in visual mode, then:
-<leader>a.                " Send the selected code with a message
-<leader>a?                " Ask a question about the selected code
+" Select some text or code in visual mode, then:
+<leader>a.                " Send the selected text straight to aider. Useful for long prompts or code examples
+<leader>a?                " Send the selected text to aider in /ask mode. Useful for long questions with large context.
 ```
 
 ## Command Reference
@@ -160,6 +159,7 @@ Tab completion is available for all subcommands.
 | `cmd`      | string | `"aider"`                  | The command or executable for aider.       |
 | `profiles` | table  | `{ default = {} }`         | Named profiles with different argument sets.|
 
+
 ### Profile Examples
 
 Profiles let you define different aider configurations for different workflows:
@@ -184,9 +184,8 @@ opts = {
 
 ## Tips and Tricks
 
-- **Smart notifications**: nvaider detects when aider is asking questions and notifies you to check the terminal.
 - **Multi-line input**: When sending messages, you can include newlines. nvaider will automatically wrap them for aider.
-- **Visual selections**: Select code and use the send/ask commands to work with specific code snippets.
+- **Visual selections**: Select text or code and use the send/ask commands to work with larger instructions and input. Hint: use a scratch buffer to compose code examples and instructions together into one prompt or question.
 - **File watching**: Use `--watch-files` in your profiles to have aider automatically detect file changes.
 - **Window management**: The aider terminal remembers its size and position between sessions.
 
