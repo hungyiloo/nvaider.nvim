@@ -30,6 +30,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 require("lazy").setup({
   {
     "hungyiloo/nvaider.nvim",
+    cmd = "Aider",
 
     -- nvaider will work without any configured opts, especially if you have an aider YAML/env setup
     opts = {
