@@ -166,6 +166,7 @@ function M.start(args_override)
     if args_override then
       start_with_args(args_override)
     else
+      -- ensure this section still works if config.profiles is not defined, or is empty. ai!
       local profile_names = vim.tbl_keys(M.config.profiles)
       table.sort(profile_names)
       if #profile_names == 1 then
