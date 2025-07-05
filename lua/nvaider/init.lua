@@ -145,7 +145,10 @@ local function handle_stdout_prompt(data)
     question_timer:start(QUESTION_DEBOUNCE_MS, 0, vim.schedule_wrap(function()
       -- Timer expired, show the notification
       if pending_question then
-        notify("Aider might have a question for you.\n\n" .. pending_question .. "\n\nUse :Aider send or focus to answer it.")
+        notify(
+          "Aider might need your input; use [:Aider send] or [:Aider focus].\n\n" .. pending_question:gsub("^", "> "),
+          vim.log.levels.WARN
+        )
         pending_question = nil
       end
       question_timer:stop()

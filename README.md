@@ -11,15 +11,20 @@ A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauth
 ## Features
 
 - 🚀 **Single command interface** - Everything through `:Aider <subcommand>`
-- 📁 **Profile management** - Define different aider configurations for different workflows
+- 📁 **Profile management** - Define different aider configurations for different situations
 - 🖥️ **Integrated terminal** - Aider runs in a side window within Neovim
 - 📂 **File management** - Add, drop, and manage tracked files from within your editor
 - 💬 **Direct communication** - Send messages and questions to aider without switching contexts
 - ⌨️ **Flexible input** - Send text via command args, prompts, or visual selections
+- 🔄 **Smart notifications** - Get notified when aider needs your attention
 
 ## Installation
 
-### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
+Prerequisites:
+- [aider](https://github.com/paul-gauthier/aider) installed and available in your PATH
+- Neovim 0.8+ (uses `vim.ui.input` and `vim.notify`)
+
+Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 require("lazy").setup({
@@ -44,11 +49,11 @@ require("lazy").setup({
     keys = {
       -- Essential mappings
       { "<leader>a<space>", ":Aider toggle<cr>", desc = "Toggle aider window" },
+      { "<leader>aa", ":Aider add<cr>", desc = "Add current file to aider" },
       { "<leader>a.", ":Aider send<cr>", desc = "Send message to aider" },
       { "<leader>a?", ":Aider ask<cr>", desc = "Ask aider a question" },
 
       -- File management
-      { "<leader>aa", ":Aider add<cr>", desc = "Add current file to aider" },
       { "<leader>ar", ":Aider read<cr>", desc = "Add file as read-only" },
       { "<leader>ad", ":Aider drop<cr>", desc = "Drop current file" },
       { "<leader>aD", ":Aider drop_all<cr>", desc = "Drop all files" },
@@ -72,11 +77,6 @@ require("lazy").setup({
 })
 ```
 
-### Prerequisites
-
-- [aider](https://github.com/paul-gauthier/aider) installed and available in your PATH
-- Neovim 0.8+ (uses `vim.ui.input` and `vim.notify`)
-
 ## Quick Start
 
 1. **Start aider**: `:Aider start` (or use your configured keybinding)
@@ -86,7 +86,7 @@ require("lazy").setup({
 
 ## Usage Examples
 
-### Basic Workflow
+Basic workflow:
 ```vim
 :Aider start              " Start aider with your default profile
 :Aider add                " Add current file to aider's context
@@ -94,7 +94,7 @@ require("lazy").setup({
 :Aider commit             " Commit the changes aider made
 ```
 
-### Working with Multiple Files
+Working with multiple files:
 ```vim
 :Aider add                " Add current file
 " Switch to another file
@@ -102,11 +102,11 @@ require("lazy").setup({
 :Aider send Refactor these two files to use a shared utility
 ```
 
-### Using Visual Selections
+Using visual selections:
 ```vim
 " Select some text or code in visual mode, then:
-<leader>a.                " Send the selected text straight to aider. Useful for long prompts or code examples
-<leader>a?                " Send the selected text to aider in /ask mode. Useful for long questions with large context.
+<leader>a.                " Send the selected text straight to aider
+<leader>a?                " Send the selected text to aider in /ask mode
 ```
 
 ## Command Reference
@@ -114,37 +114,37 @@ require("lazy").setup({
 All functionality is accessed through the `:Aider` command with subcommands:
 
 ```
-:Aider <subcommand> [optional arguments]
+:Aider <subcommand> [optional arguments, e.g. input text]
 ```
 
 Tab completion is available for all subcommands.
 
-### Managing the Aider Instance
+Managing the aider instance:
 
 - **`start [args...]`** - Start aider with optional argument overrides. If multiple profiles are configured, you'll be prompted to choose one.
 - **`stop`** - Stop the aider process and close any open windows.
 - **`rewrite_args`** - Modify the arguments for the current aider session. Prompts for new arguments and restarts aider.
 
-### Window and Focus Management
+Window and focus management:
 
 - **`toggle`** - Show or hide the aider terminal window.
 - **`show`** - Open the aider terminal window (if not already visible).
 - **`hide`** - Close the aider terminal window.
 - **`focus`** - Open the aider terminal window and enter insert mode for immediate typing.
 
-### Managing Tracked Files
+Managing tracked files:
 
 - **`add`** - Add the current file to aider's context for editing.
 - **`read`** - Add the current file as read-only (aider can see it but won't modify it).
 - **`drop`** - Remove the current file from aider's context.
 - **`drop_all`** - Remove all files from aider's context.
 
-### Sending Input to Aider
+Sending input to aider:
 
 - **`send [text]`** - Send a message to aider. If no text is provided, you'll be prompted to enter it. In visual mode, sends the selected text.
 - **`ask [text]`** - Send a question to aider using the `/ask` command. Prompts for input if no text provided.
 
-### Advanced Operations
+Advanced operations:
 
 - **`commit`** - Tell aider to commit the current changes.
 - **`reset`** - Reset aider's conversation history and context.
@@ -152,15 +152,12 @@ Tab completion is available for all subcommands.
 
 ## Configuration
 
-### Options
 
 | Option     | Type   | Default                    | Description                                 |
 | ---------- | ------ | -------------------------- | ------------------------------------------- |
 | `cmd`      | string | `"aider"`                  | The command or executable for aider.       |
 | `profiles` | table  | `{ default = {} }`         | Named profiles with different argument sets.|
 
-
-### Profile Examples
 
 Profiles let you define different aider configurations for different workflows:
 
@@ -185,12 +182,13 @@ opts = {
 ## Tips and Tricks
 
 - **Multi-line input**: When sending messages, you can include newlines. nvaider will automatically wrap them for aider.
-- **Visual selections**: Select text or code and use the send/ask commands to work with larger instructions and input. Hint: use a scratch buffer to compose code examples and instructions together into one prompt or question.
+- **Visual selections**: Select text or code and use the send/ask commands to work with larger instructions and input. _(hint: use a scratch buffer to compose code examples and instructions together into one prompt or question)_
 - **File watching**: Use `--watch-files` in your profiles to have aider automatically detect file changes.
-- **Window management**: The aider terminal remembers its size and position between sessions.
+- **Smart notifications**: nvaider detects when aider is asking questions and notifies you. _(hint: use `:Aider send` to send a simple `y` or `n`)_
+
 
 ## Troubleshooting
 
 - **Aider won't start**: Check that `aider` is installed and in your PATH
 - **No response from aider**: Use `:Aider focus` to check if aider is waiting for input
-- **Window issues**: Try `:Aider stop` and `:Aider start` to reset the session
+- **Window issues**: Try `:Aider stop`, deleting any leftover stuck windows, then `:Aider start` to reset the session
