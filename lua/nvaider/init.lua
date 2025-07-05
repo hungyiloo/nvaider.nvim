@@ -218,11 +218,6 @@ function M.start(args_override)
       M.show()
     end
 
-    -- treat empty args_override as nil
-    if args_override ~= nil and #args_override == 0 then
-      args_override = nil
-    end
-
     if args_override then
       start_with_args(args_override)
     else
@@ -406,6 +401,10 @@ end
 
 local function dispatch(sub, args)
   if sub == 'start' then
+    -- treat empty args as nil
+    if args ~= nil and #args == 0 then
+      args = nil
+    end
     M.start(args)
   elseif sub == 'rewrite_args' then
     M.rewrite_args(args)
