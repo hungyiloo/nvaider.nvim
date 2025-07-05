@@ -1,5 +1,9 @@
 # 🤖 `nvaider.nvim`
 
+> [!WARNING] 
+> This project is still under active development and the interfaces are unstable and may change. 
+> However, I dogfood this plugin every day for work purposes and it's stable under my usage patterns.
+
 A minimalist Neovim plugin to integrate the [aider](https://github.com/your/aider) CLI via a side terminal and a single `:Aider` command with subcommands.
 
 ![screenshot](https://github.com/user-attachments/assets/d9df533a-2c11-44b2-8279-c4e8f828c68e)
