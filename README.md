@@ -183,7 +183,7 @@ opts = {
 
 - **Multi-line input**: When sending messages, you can include newlines. nvaider will automatically wrap them for aider.
 - **Visual selections**: Select text or code and use the send/ask commands to work with larger instructions and input. _(hint: use a scratch buffer to compose code examples and instructions together into one prompt or question)_
-- **File watching**: Use `--watch-files` in your profiles to have aider automatically detect file changes.
+- **File watching**: Use `--watch-files` in your profiles to have aider automatically detect "ai!" comments in your code to magically trigger changes.
 - **Smart notifications**: nvaider detects when aider is asking questions and notifies you. _(hint: use `:Aider send` to send a simple `y` or `n`)_
 
 
