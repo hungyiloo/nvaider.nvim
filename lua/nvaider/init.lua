@@ -132,10 +132,7 @@ function M.start(args_override)
 
   local function do_start()
     local buf = vim.api.nvim_create_buf(false, true)
-    -- treat empty args_override as nil
-    if args_override ~= nil and #args_override == 0 then
-      args_override = nil
-    end
+
     local function start_with_args(final_args)
       local args = vim.list_extend({ M.config.cmd }, final_args)
       M.last_args = args
@@ -159,6 +156,11 @@ function M.start(args_override)
       end)
       M.state.buf_nr = buf
       M.show()
+    end
+
+    -- treat empty args_override as nil
+    if args_override ~= nil and #args_override == 0 then
+      args_override = nil
     end
 
     if args_override then
