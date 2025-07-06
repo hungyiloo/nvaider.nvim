@@ -482,11 +482,12 @@ function M.ask(args)
 end
 
 local function dispatch(sub, args)
+  -- treat empty args as nil
+  if args ~= nil and #args == 0 then
+    args = nil
+  end
+
   if sub == 'start' then
-    -- treat empty args as nil
-    if args ~= nil and #args == 0 then
-      args = nil
-    end
     M.start(args)
   elseif sub == 'rewrite_args' then
     M.rewrite_args()
