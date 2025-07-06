@@ -329,6 +329,29 @@ function M.stop()
   notify("Stopped aider")
 end
 
+function M.stop_all()
+  local stopped_count = 0
+  for tab_id, state in pairs(tab_states) do
+    if state.job_id then
+      vim.fn.jobstop(state.job_id)
+      stopped_count = stopped_count + 1
+    end
+    if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
+      vim.api.nvim_win_close(state.win_id, true)
+    end
+    if state.check_timer then
+      state.check_timer:stop()
+      state.check_timer:close()
+    end
+  end
+  tab_states = {}
+  if stopped_count > 0 then
+    notify("Stopped " .. stopped_count .. " aider instance(s) across all tabs")
+  else
+    notify("No aider instances were running")
+  end
+end
+
 function M.toggle()
   if not is_running() then
     M.start()
@@ -469,6 +492,8 @@ local function dispatch(sub, args)
     M.rewrite_args()
   elseif sub == 'stop' then
     M.stop()
+  elseif sub == 'stop_all' then
+    M.stop_all()
   elseif sub == 'toggle' then
     M.toggle()
   elseif sub == 'add' then
@@ -532,7 +557,7 @@ function M.setup(opts)
       nargs = '*',
       range = true,
       complete = function(argLead, cmdLine, cursorPos)
-        local subs = { 'start', 'rewrite_args', 'stop', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+        local subs = { 'start', 'rewrite_args', 'stop', 'stop_all', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
         return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
       end,
     })

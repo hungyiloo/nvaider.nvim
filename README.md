@@ -65,7 +65,8 @@ require("lazy").setup({
 
       -- Instance management
       { "<leader>a<cr>", ":Aider start<cr>", desc = "Start/restart aider" },
-      { "<leader>a<backspace>", ":Aider stop<cr>", desc = "Stop aider" },
+      { "<leader>aq", ":Aider stop<cr>", desc = "Stop aider" },
+      { "<leader>aQ", ":Aider stop_all<cr>", desc = "Stop all aider instances" },
       { "<leader>af", ":Aider focus<cr>", desc = "Focus aider terminal" },
 
       -- Advanced
@@ -128,6 +129,7 @@ Managing the aider instance:
 
 - **`start [args...]`** - Start aider with optional argument overrides. If multiple profiles are configured, you'll be prompted to choose one.
 - **`stop`** - Stop the aider process and close any open windows.
+- **`stop_all`** - Stop all aider instances across all tabs and clean up all state.
 - **`rewrite_args`** - Modify the arguments for the current aider session. Prompts for new arguments and restarts aider.
 
 Window and focus management:
