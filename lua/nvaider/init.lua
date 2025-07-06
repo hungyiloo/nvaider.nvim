@@ -5,15 +5,25 @@ local M = {
       default = {},
     },
   },
-  state = {
-    last_args = nil,
-    job_id = nil,
-    buf_nr = nil,
-    win_id = nil,
-    --- @type uv.uv_timer_t?
-    check_timer = nil,
-  },
 }
+
+-- Per-tab state tracking
+local tab_states = {}
+
+local function get_state()
+  local tab_id = vim.api.nvim_get_current_tabpage()
+  if not tab_states[tab_id] then
+    tab_states[tab_id] = {
+      last_args = nil,
+      job_id = nil,
+      buf_nr = nil,
+      win_id = nil,
+      --- @type uv.uv_timer_t?
+      check_timer = nil,
+    }
+  end
+  return tab_states[tab_id]
+end
 
 local function notify(message, level)
   vim.notify(message, level or vim.log.levels.INFO, { title = "nvaider" })
@@ -47,21 +57,23 @@ local function handle_user_input(cmd_fn, prompt, args)
 end
 
 local function reset_state()
-  M.state.job_id = nil
-  M.state.buf_nr = nil
-  M.state.win_id = nil
-  if M.state.check_timer then
-    M.state.check_timer:stop()
-    M.state.check_timer:close()
-    M.state.check_timer = nil
+  local state = get_state()
+  state.job_id = nil
+  state.buf_nr = nil
+  state.win_id = nil
+  if state.check_timer then
+    state.check_timer:stop()
+    state.check_timer:close()
+    state.check_timer = nil
   end
 end
 
 local function is_running()
-  if M.state.buf_nr and not vim.api.nvim_buf_is_valid(M.state.buf_nr) then
+  local state = get_state()
+  if state.buf_nr and not vim.api.nvim_buf_is_valid(state.buf_nr) then
     reset_state()
   end
-  if M.state.job_id then return true end
+  if state.job_id then return true end
   return false
 end
 
@@ -102,26 +114,29 @@ local function get_terminal_width()
 end
 
 local function close_window()
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-    vim.api.nvim_win_close(M.state.win_id, true)
-    M.state.win_id = nil
+  local state = get_state()
+  if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
+    vim.api.nvim_win_close(state.win_id, true)
+    state.win_id = nil
   end
 end
 
 local function is_window_showing()
-  return M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id)
+  local state = get_state()
+  return state.win_id and vim.api.nvim_win_is_valid(state.win_id)
 end
 
 local function open_window(enter_insert)
+  local state = get_state()
   local current_win = vim.api.nvim_get_current_win()
   vim.cmd('rightbelow vsplit')
-  M.state.win_id = vim.api.nvim_get_current_win()
-  vim.api.nvim_win_set_buf(M.state.win_id, M.state.buf_nr)
-  vim.api.nvim_set_option_value('number', false, { win = M.state.win_id })
-  vim.api.nvim_set_option_value('relativenumber', false, { win = M.state.win_id })
+  state.win_id = vim.api.nvim_get_current_win()
+  vim.api.nvim_win_set_buf(state.win_id, state.buf_nr)
+  vim.api.nvim_set_option_value('number', false, { win = state.win_id })
+  vim.api.nvim_set_option_value('relativenumber', false, { win = state.win_id })
   local win_width = get_terminal_width()
-  vim.api.nvim_win_set_width(M.state.win_id, win_width)
-  vim.api.nvim_buf_set_keymap(M.state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
+  vim.api.nvim_win_set_width(state.win_id, win_width)
+  vim.api.nvim_buf_set_keymap(state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
   if enter_insert then vim.cmd('startinsert') end
   return current_win
 end
@@ -182,25 +197,27 @@ local function handle_stdout_prompt(data)
 end
 
 local function scroll_to_latest()
-  if M.state.win_id and vim.api.nvim_win_is_valid(M.state.win_id) then
-    if vim.api.nvim_get_current_win() ~= M.state.win_id then
-      pcall(vim.api.nvim_win_call, M.state.win_id, function() vim.cmd('normal! G') end)
+  local state = get_state()
+  if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
+    if vim.api.nvim_get_current_win() ~= state.win_id then
+      pcall(vim.api.nvim_win_call, state.win_id, function() vim.cmd('normal! G') end)
     end
   end
 end
 
 local function debounce_check()
-  if M.state.check_timer then
-    M.state.check_timer:stop()
-    M.state.check_timer:close()
+  local state = get_state()
+  if state.check_timer then
+    state.check_timer:stop()
+    state.check_timer:close()
   end
-  M.state.check_timer = vim.uv.new_timer()
-  M.state.check_timer:start(100, 0, vim.schedule_wrap(function()
+  state.check_timer = vim.uv.new_timer()
+  state.check_timer:start(100, 0, vim.schedule_wrap(function()
     vim.cmd('silent! checktime')
     -- clean up
-    M.state.check_timer:stop()
-    M.state.check_timer:close()
-    M.state.check_timer = nil
+    state.check_timer:stop()
+    state.check_timer:close()
+    state.check_timer = nil
   end))
 end
 
@@ -214,10 +231,11 @@ function M.start(args_override)
     local buf = vim.api.nvim_create_buf(false, true)
 
     local function start_with_args(final_args)
-      M.last_args = final_args
+      local state = get_state()
+      state.last_args = final_args
       local args = vim.list_extend({ M.config.cmd }, final_args)
       vim.api.nvim_buf_call(buf, function()
-        M.state.job_id = vim.fn.jobstart(args, {
+        state.job_id = vim.fn.jobstart(args, {
           term = true,
           width = get_terminal_width(),
           cwd = vim.fn.getcwd(),
@@ -234,7 +252,7 @@ function M.start(args_override)
         notify("Starting " .. table.concat(args, ' '))
         M._starting = false
       end)
-      M.state.buf_nr = buf
+      state.buf_nr = buf
       M.show()
     end
 
@@ -255,19 +273,19 @@ function M.start(args_override)
         vim.ui.select(profile_names, {
           prompt = 'Select nvaider profile:',
         }, function(choice)
-          if not choice then
-            M._starting = false
-            return
-          end
-          start_with_args(profiles[choice])
-        end)
+            if not choice then
+              M._starting = false
+              return
+            end
+            start_with_args(profiles[choice])
+          end)
       end
     end
   end
 
   if is_running() then
     -- Restart: stop current instance and start new one with potentially different args
-    local old_job_id = M.state.job_id
+    local old_job_id = get_state().job_id
     close_window()
     reset_state()
 
@@ -303,8 +321,9 @@ function M.start(args_override)
 end
 
 function M.stop()
-  if not M.state.job_id then return end
-  vim.fn.jobstop(M.state.job_id)
+  local state = get_state()
+  if not state.job_id then return end
+  vim.fn.jobstop(state.job_id)
   close_window()
   reset_state()
   notify("Stopped aider")
@@ -329,7 +348,7 @@ local function send_text_with_cr(text)
     if text:find('\n') then
       text = "{nvaider\n" .. text .. "\nnvaider}"
     end
-    vim.fn.chansend(M.state.job_id, text .. '\n')
+    vim.fn.chansend(get_state().job_id, text .. '\n')
   end)
 end
 
@@ -378,7 +397,7 @@ end
 function M.abort()
   ensure_running(function(success)
     if not success then return end
-    vim.fn.chansend(M.state.job_id, "\003") -- Ctrl+C
+    vim.fn.chansend(get_state().job_id, "\003") -- Ctrl+C
     notify("Sent abort signal to aider")
   end)
 end
@@ -408,7 +427,7 @@ function M.focus()
   ensure_running(function(success)
     if not success then return end
     if is_window_showing() then
-      vim.api.nvim_set_current_win(M.state.win_id)
+      vim.api.nvim_set_current_win(get_state().win_id)
       vim.cmd('startinsert')
     else
       open_window(true)
@@ -417,7 +436,7 @@ function M.focus()
 end
 
 function M.rewrite_args()
-  local current_args = table.concat(M.last_args or {}, ' ')
+  local current_args = table.concat(get_state().last_args or {}, ' ')
   vim.ui.input(
     {
       prompt = 'aider args> ',
@@ -485,19 +504,38 @@ function M.setup(opts)
   M.config = vim.tbl_extend('force', M.config, opts or {})
   if M._initialized then return end
   M._initialized = true
+
+  -- Cleanup aider state when tab is closed
+  vim.api.nvim_create_autocmd("TabClosed", {
+    callback = function(args)
+      local tab_id = tonumber(args.match)
+      if tab_id ~= nil and tab_states[tab_id] then
+        local state = tab_states[tab_id]
+        if state.job_id then
+          vim.fn.jobstop(state.job_id)
+        end
+        if state.check_timer then
+          state.check_timer:stop()
+          state.check_timer:close()
+        end
+        tab_states[tab_id] = nil
+      end
+    end
+  })
+
   vim.api.nvim_create_user_command('Aider', function(cmd_opts)
     local args = vim.fn.split(cmd_opts.args)
     local sub = args[1]
     table.remove(args, 1)
     dispatch(sub, args)
   end, {
-    nargs = '*',
-    range = true,
-    complete = function(argLead, cmdLine, cursorPos)
-      local subs = { 'start', 'rewrite_args', 'stop', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
-      return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
-    end,
-  })
+      nargs = '*',
+      range = true,
+      complete = function(argLead, cmdLine, cursorPos)
+        local subs = { 'start', 'rewrite_args', 'stop', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+        return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
+      end,
+    })
 end
 
 -- auto-initialize with defaults
