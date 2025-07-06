@@ -64,17 +64,49 @@ local function handle_user_input(cmd_fn, prompt, args)
   end
 end
 
+local function get_terminal_width()
+  return math.floor(vim.o.columns * 0.35)
+end
+
+local function is_window_showing()
+  local state = get_state()
+  return state.win_id and vim.api.nvim_win_is_valid(state.win_id)
+end
+
+local function open_window(enter_insert)
+  local state = get_state()
+  local current_win = vim.api.nvim_get_current_win()
+  vim.cmd('rightbelow vsplit')
+  state.win_id = vim.api.nvim_get_current_win()
+  vim.api.nvim_win_set_buf(state.win_id, state.buf_nr)
+  vim.api.nvim_set_option_value('number', false, { win = state.win_id })
+  vim.api.nvim_set_option_value('relativenumber', false, { win = state.win_id })
+  local win_width = get_terminal_width()
+  vim.api.nvim_win_set_width(state.win_id, win_width)
+  vim.api.nvim_buf_set_keymap(state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
+  if enter_insert then vim.cmd('startinsert') end
+  return current_win
+end
+
+local function close_window()
+  local state = get_state()
+  if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
+    vim.api.nvim_win_close(state.win_id, true)
+    state.win_id = nil
+  end
+end
+
 local function reset_state(stop_job, close_win)
   local state = get_state()
-  
+
   if stop_job and state.job_id then
     vim.fn.jobstop(state.job_id)
   end
-  
+
   if close_win then
     close_window()
   end
-  
+
   state.job_id = nil
   state.buf_nr = nil
   state.win_id = nil
@@ -120,38 +152,6 @@ local function ensure_running(callback)
       callback(false)
     end
   end))
-end
-
-local function get_terminal_width()
-  return math.floor(vim.o.columns * 0.35)
-end
-
-local function close_window()
-  local state = get_state()
-  if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
-    vim.api.nvim_win_close(state.win_id, true)
-    state.win_id = nil
-  end
-end
-
-local function is_window_showing()
-  local state = get_state()
-  return state.win_id and vim.api.nvim_win_is_valid(state.win_id)
-end
-
-local function open_window(enter_insert)
-  local state = get_state()
-  local current_win = vim.api.nvim_get_current_win()
-  vim.cmd('rightbelow vsplit')
-  state.win_id = vim.api.nvim_get_current_win()
-  vim.api.nvim_win_set_buf(state.win_id, state.buf_nr)
-  vim.api.nvim_set_option_value('number', false, { win = state.win_id })
-  vim.api.nvim_set_option_value('relativenumber', false, { win = state.win_id })
-  local win_width = get_terminal_width()
-  vim.api.nvim_win_set_width(state.win_id, win_width)
-  vim.api.nvim_buf_set_keymap(state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
-  if enter_insert then vim.cmd('startinsert') end
-  return current_win
 end
 
 -- debounce state for question notifications
