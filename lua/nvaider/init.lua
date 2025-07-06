@@ -64,8 +64,17 @@ local function handle_user_input(cmd_fn, prompt, args)
   end
 end
 
-local function reset_state()
+local function reset_state(stop_job, close_win)
   local state = get_state()
+  
+  if stop_job and state.job_id then
+    vim.fn.jobstop(state.job_id)
+  end
+  
+  if close_win then
+    close_window()
+  end
+  
   state.job_id = nil
   state.buf_nr = nil
   state.win_id = nil
@@ -244,8 +253,7 @@ function M.start(args_override)
             debounce_check()
           end,
           on_exit = function()
-            close_window()
-            reset_state()
+            reset_state(false, true)
           end,
         })
         notify("Starting " .. table.concat(args, ' '))
@@ -285,8 +293,7 @@ function M.start(args_override)
   if is_running() then
     -- Restart: stop current instance and start new one with potentially different args
     local old_job_id = get_state().job_id
-    close_window()
-    reset_state()
+    reset_state(false, true)
 
     -- Stop the old job and wait for it to exit before starting new one
     if old_job_id then
@@ -322,9 +329,7 @@ end
 function M.stop()
   local state = get_state()
   if not state.job_id then return end
-  vim.fn.jobstop(state.job_id)
-  close_window()
-  reset_state()
+  reset_state(true, true)
   notify("Stopped aider")
 end
 
@@ -332,16 +337,12 @@ function M.stop_all()
   local stopped_count = 0
   for tab_id, state in pairs(tab_states) do
     if state.job_id then
-      vim.fn.jobstop(state.job_id)
       stopped_count = stopped_count + 1
     end
-    if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
-      vim.api.nvim_win_close(state.win_id, true)
-    end
-    if state.check_timer then
-      state.check_timer:stop()
-      state.check_timer:close()
-    end
+    -- Temporarily set current tab state to clean up this specific state
+    local current_tab = vim.api.nvim_get_current_tabpage()
+    tab_states[current_tab] = state
+    reset_state(true, true)
   end
   tab_states = {}
   if stopped_count > 0 then
@@ -534,11 +535,12 @@ function M.setup(opts)
     callback = function(args)
       local tab_id = tonumber(args.match)
       if tab_id ~= nil and tab_states[tab_id] then
-        local state = tab_states[tab_id]
-        if state.job_id then
-          vim.fn.jobstop(state.job_id)
-        end
-        state.check_timer = cleanup_timer(state.check_timer)
+        -- Temporarily set current tab state to clean up this specific state
+        local current_tab = vim.api.nvim_get_current_tabpage()
+        local original_state = tab_states[current_tab]
+        tab_states[current_tab] = tab_states[tab_id]
+        reset_state(true, false)
+        tab_states[current_tab] = original_state
         tab_states[tab_id] = nil
       end
     end
