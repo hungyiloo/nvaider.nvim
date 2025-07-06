@@ -213,7 +213,10 @@ local function scroll_to_latest()
   local state = get_state()
   if state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
     if vim.api.nvim_get_current_win() ~= state.win_id then
-      pcall(vim.api.nvim_win_call, state.win_id, function() vim.cmd('normal! G') end)
+      pcall(vim.api.nvim_win_call, state.win_id, function()
+        local line_count = vim.api.nvim_buf_line_count(state.buf_nr)
+        vim.api.nvim_win_set_cursor(state.win_id, {line_count, 0})
+      end)
     end
   end
 end
