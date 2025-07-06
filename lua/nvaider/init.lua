@@ -29,6 +29,14 @@ local function notify(message, level)
   vim.notify(message, level or vim.log.levels.INFO, { title = "nvaider" })
 end
 
+local function cleanup_timer(timer)
+  if timer then
+    timer:stop()
+    timer:close()
+  end
+  return nil
+end
+
 local function handle_user_input(cmd_fn, prompt, args)
   local txt = table.concat(args or {}, ' ')
   if txt == '' then
@@ -61,11 +69,7 @@ local function reset_state()
   state.job_id = nil
   state.buf_nr = nil
   state.win_id = nil
-  if state.check_timer then
-    state.check_timer:stop()
-    state.check_timer:close()
-    state.check_timer = nil
-  end
+  state.check_timer = cleanup_timer(state.check_timer)
 end
 
 local function is_running()
@@ -207,17 +211,12 @@ end
 
 local function debounce_check()
   local state = get_state()
-  if state.check_timer then
-    state.check_timer:stop()
-    state.check_timer:close()
-  end
+  state.check_timer = cleanup_timer(state.check_timer)
   state.check_timer = vim.uv.new_timer()
   state.check_timer:start(100, 0, vim.schedule_wrap(function()
     vim.cmd('silent! checktime')
     -- clean up
-    state.check_timer:stop()
-    state.check_timer:close()
-    state.check_timer = nil
+    state.check_timer = cleanup_timer(state.check_timer)
   end))
 end
 
@@ -539,10 +538,7 @@ function M.setup(opts)
         if state.job_id then
           vim.fn.jobstop(state.job_id)
         end
-        if state.check_timer then
-          state.check_timer:stop()
-          state.check_timer:close()
-        end
+        state.check_timer = cleanup_timer(state.check_timer)
         tab_states[tab_id] = nil
       end
     end
