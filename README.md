@@ -17,6 +17,7 @@ A Neovim plugin that seamlessly integrates [aider](https://github.com/paul-gauth
 - 💬 **Direct communication** - Send messages and questions to aider without switching contexts
 - ⌨️ **Flexible input** - Send text via command args, prompts, or visual selections
 - 🔄 **Smart notifications** - Get notified when aider needs your attention
+- 📑 Per-tab instance - run an instance of aider on each tab for easy context switching
 
 ## Installation
 
