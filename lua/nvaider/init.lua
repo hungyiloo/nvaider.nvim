@@ -10,8 +10,8 @@ local M = {
 -- Per-tab state tracking
 local tab_states = {}
 
-local function get_state()
-  local tab_id = vim.api.nvim_get_current_tabpage()
+local function get_state(tab_id)
+  tab_id = tab_id or vim.api.nvim_get_current_tabpage()
   if not tab_states[tab_id] then
     tab_states[tab_id] = {
       last_args = nil,
@@ -96,15 +96,15 @@ local function close_window()
   end
 end
 
-local function reset_state(stop_job, close_win)
-  local state = get_state()
+local function reset_state(stop_job, close_win, tab_id)
+  local state = get_state(tab_id)
 
   if stop_job and state.job_id then
     vim.fn.jobstop(state.job_id)
   end
 
-  if close_win then
-    close_window()
+  if close_win and state.win_id and vim.api.nvim_win_is_valid(state.win_id) then
+    vim.api.nvim_win_close(state.win_id, true)
   end
 
   state.job_id = nil
@@ -339,10 +339,7 @@ function M.stop_all()
     if state.job_id then
       stopped_count = stopped_count + 1
     end
-    -- Temporarily set current tab state to clean up this specific state
-    local current_tab = vim.api.nvim_get_current_tabpage()
-    tab_states[current_tab] = state
-    reset_state(true, true)
+    reset_state(true, true, tab_id)
   end
   tab_states = {}
   if stopped_count > 0 then
@@ -535,12 +532,7 @@ function M.setup(opts)
     callback = function(args)
       local tab_id = tonumber(args.match)
       if tab_id ~= nil and tab_states[tab_id] then
-        -- Temporarily set current tab state to clean up this specific state
-        local current_tab = vim.api.nvim_get_current_tabpage()
-        local original_state = tab_states[current_tab]
-        tab_states[current_tab] = tab_states[tab_id]
-        reset_state(true, false)
-        tab_states[current_tab] = original_state
+        reset_state(true, false, tab_id)
         tab_states[tab_id] = nil
       end
     end
