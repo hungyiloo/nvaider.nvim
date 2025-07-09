@@ -10,4 +10,14 @@ local M = {
   },
 }
 
+function M.update(opts)
+  for key, value in pairs(opts) do
+    if type(value) == "table" and type(M[key]) == "table" then
+      M[key] = vim.tbl_deep_extend('force', M[key], value)
+    else
+      M[key] = value
+    end
+  end
+end
+
 return M
