@@ -171,6 +171,7 @@ Advanced operations:
 
 ## Configuration
 
+Options:
 
 | Option     | Type   | Default                    | Description                                 |
 | ---------- | ------ | -------------------------- | ------------------------------------------- |
@@ -178,7 +179,8 @@ Advanced operations:
 | `profiles` | table  | `{ default = {} }`         | Named profiles with different argument sets.|
 | `window`   | table  | See below                  | Window positioning and sizing options.      |
 
-### Window Configuration
+
+`window`:
 
 | Option       | Type   | Default   | Description                                           |
 | ------------ | ------ | --------- | ----------------------------------------------------- |
@@ -187,10 +189,9 @@ Advanced operations:
 | `height`     | number | `0.3`     | Window height as fraction of total height (for top/bottom positions) |
 
 
-Profiles let you define different aider configurations for different workflows:
-
 ```lua
 opts = {
+  -- profiles let you define different aider configurations for different workflows
   profiles = {
     -- Quick coding with Claude
     claude = { "--model", "claude-3-5-sonnet-20241022", "--cache-prompts" },
@@ -207,26 +208,10 @@ opts = {
 
   -- Configure window positioning and sizing
   window = {
-    position = "bottom",  -- Open aider terminal at bottom of screen
-    height = 0.4,         -- Use 40% of screen height
+    position = "right",  -- Open aider terminal at bottom of screen
+    height = 0.35,       -- Use 35% of screen height
   }
 }
-```
-
-### Window Positioning Examples
-
-```lua
--- Right side (default)
-window = { position = "right", width = 0.35 }
-
--- Left side with narrower width
-window = { position = "left", width = 0.25 }
-
--- Bottom with more height
-window = { position = "bottom", height = 0.4 }
-
--- Top with compact height
-window = { position = "top", height = 0.2 }
 ```
 
 ## Tips and Tricks

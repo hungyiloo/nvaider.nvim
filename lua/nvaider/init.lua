@@ -87,7 +87,7 @@ local function open_window(enter_insert)
   local state = get_state()
   local current_win = vim.api.nvim_get_current_win()
   local pos = M.config.window.position
-  
+
   -- Create split based on position
   if pos == "right" then
     vim.cmd('rightbelow vsplit')
@@ -98,12 +98,12 @@ local function open_window(enter_insert)
   elseif pos == "top" then
     vim.cmd('leftabove split')
   end
-  
+
   state.win_id = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(state.win_id, state.buf_nr)
   vim.api.nvim_set_option_value('number', false, { win = state.win_id })
   vim.api.nvim_set_option_value('relativenumber', false, { win = state.win_id })
-  
+
   -- Set window size based on position
   local size = get_window_size()
   if pos == "left" or pos == "right" then
@@ -111,7 +111,7 @@ local function open_window(enter_insert)
   else -- top or bottom
     vim.api.nvim_win_set_height(state.win_id, size)
   end
-  
+
   vim.api.nvim_buf_set_keymap(state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
   if enter_insert then vim.cmd('startinsert') end
   return current_win
