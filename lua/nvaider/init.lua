@@ -76,7 +76,7 @@ local function dispatch(sub, args)
 end
 
 function M.setup(opts)
-  M.config = vim.tbl_extend('force', M.config, opts or {})
+  M.config = vim.tbl_deep_extend('force', M.config, opts or {})
   if M._initialized then return end
   M._initialized = true
 
@@ -107,7 +107,6 @@ function M.setup(opts)
 end
 
 -- auto-initialize with defaults
-M.setup()
 
 
 return M
