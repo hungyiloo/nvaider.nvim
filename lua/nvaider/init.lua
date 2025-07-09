@@ -109,6 +109,6 @@ function M.setup(opts)
 end
 
 -- auto-initialize with defaults
-
+M.setup()
 
 return M
