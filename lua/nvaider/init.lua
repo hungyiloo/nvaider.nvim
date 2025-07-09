@@ -478,7 +478,11 @@ function M.send(args)
 end
 
 function M.ask(args)
-  handle_user_input(function (input) send_text_with_cr('/ask ' .. input) end, 'ask aider> ', args)
+  handle_user_input(function (input) send_text_with_cr('/ask ' .. input) end, 'aider ask> ', args)
+end
+
+function M.architect(args)
+  handle_user_input(function (input) send_text_with_cr('/architect ' .. input) end, 'aider architect> ', args)
 end
 
 local function dispatch(sub, args)
@@ -515,6 +519,8 @@ local function dispatch(sub, args)
     M.send(args)
   elseif sub == 'ask' then
     M.ask(args)
+  elseif sub == 'architect' then
+    M.architect(args)
   elseif sub == 'show' then
     M.show()
   elseif sub == 'focus' then
@@ -551,7 +557,7 @@ function M.setup(opts)
       nargs = '*',
       range = true,
       complete = function(argLead, cmdLine, cursorPos)
-        local subs = { 'start', 'rewrite_args', 'stop', 'stop_all', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'show', 'focus', 'hide' }
+        local subs = { 'start', 'rewrite_args', 'stop', 'stop_all', 'toggle', 'add', 'read', 'drop', 'drop_all', 'reset', 'abort', 'commit', 'send', 'ask', 'architect', 'show', 'focus', 'hide' }
         return vim.tbl_filter(function(item) return item:match('^' .. argLead) end, subs)
       end,
     })

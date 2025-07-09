@@ -71,6 +71,7 @@ require("lazy").setup({
       { "<leader>af", ":Aider focus<cr>", desc = "Focus aider terminal" },
 
       -- Advanced
+      { "<leader>a>", ":Aider architect<cr>", desc = "Architect with aider" },
       { "<leader>ac", ":Aider commit<cr>", desc = "Commit with aider" },
       { "<leader>aR", ":Aider reset<cr>", desc = "Reset aider session" },
       { "<leader>ax", ":Aider abort<cr>", desc = "Abort current operation" },
@@ -79,6 +80,7 @@ require("lazy").setup({
       -- Visual mode mappings
       { mode = "x", "<leader>a.", function() require("nvaider").send() end, desc = "Send selection to aider" },
       { mode = "x", "<leader>a?", function() require("nvaider").ask() end, desc = "Ask about selection" },
+      { mode = "x", "<leader>a>", function() require("nvaider").architect() end, desc = "Architect with selection" },
     }
   },
 })
@@ -114,6 +116,7 @@ Using visual selections:
 " Select some text or code in visual mode, then:
 <leader>a.                " Send the selected text straight to aider
 <leader>a?                " Send the selected text to aider in /ask mode
+<leader>a>                " Send the selected text to aider in /architect mode
 ```
 
 ## Command Reference
@@ -151,6 +154,7 @@ Sending input to aider:
 
 - **`send [text]`** - Send a message to aider. If no text is provided, you'll be prompted to enter it. In visual mode, sends the selected text.
 - **`ask [text]`** - Send a question to aider using the `/ask` command. Prompts for input if no text provided.
+- **`architect [text]`** - Send design instructions to aider using the `/architect` command. Prompts for input if no text provided.
 
 Advanced operations:
 
@@ -190,7 +194,7 @@ opts = {
 ## Tips and Tricks
 
 - **Multi-line input**: When sending messages, you can include newlines. nvaider will automatically wrap them for aider.
-- **Visual selections**: Select text or code and use the send/ask commands to work with larger instructions and input. _(hint: use a scratch buffer to compose code examples and instructions together into one prompt or question)_
+- **Visual selections**: Select text or code and use the send/ask/architect commands to work with larger instructions and input. _(hint: use a scratch buffer to compose code examples and instructions together into one prompt or question)_
 - **File watching**: Use `--watch-files` in your profiles to have aider automatically detect "ai!" comments in your code to magically trigger changes.
 - **Smart notifications**: nvaider detects when aider is asking questions and notifies you. _(hint: use `:Aider send` to send a simple `y` or `n`)_
 - **Send any input**: `:Aider send` isn't just for prompts; you can also send arbitrary commands like `/help` or `/architect` to aider.
