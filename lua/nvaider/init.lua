@@ -4,6 +4,11 @@ local M = {
     profiles = {
       default = {},
     },
+    window = {
+      position = "right", -- "top", "bottom", "left", "right"
+      width = 0.35,       -- for left/right positions (fraction of total width)
+      height = 0.3,       -- for top/bottom positions (fraction of total height)
+    },
   },
 }
 
@@ -64,8 +69,13 @@ local function handle_user_input(cmd_fn, prompt, args)
   end
 end
 
-local function get_terminal_width()
-  return math.floor(vim.o.columns * 0.35)
+local function get_window_size()
+  local pos = M.config.window.position
+  if pos == "left" or pos == "right" then
+    return math.floor(vim.o.columns * M.config.window.width)
+  else -- top or bottom
+    return math.floor(vim.o.lines * M.config.window.height)
+  end
 end
 
 local function is_window_showing()
@@ -76,13 +86,32 @@ end
 local function open_window(enter_insert)
   local state = get_state()
   local current_win = vim.api.nvim_get_current_win()
-  vim.cmd('rightbelow vsplit')
+  local pos = M.config.window.position
+  
+  -- Create split based on position
+  if pos == "right" then
+    vim.cmd('rightbelow vsplit')
+  elseif pos == "left" then
+    vim.cmd('leftabove vsplit')
+  elseif pos == "bottom" then
+    vim.cmd('rightbelow split')
+  elseif pos == "top" then
+    vim.cmd('leftabove split')
+  end
+  
   state.win_id = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(state.win_id, state.buf_nr)
   vim.api.nvim_set_option_value('number', false, { win = state.win_id })
   vim.api.nvim_set_option_value('relativenumber', false, { win = state.win_id })
-  local win_width = get_terminal_width()
-  vim.api.nvim_win_set_width(state.win_id, win_width)
+  
+  -- Set window size based on position
+  local size = get_window_size()
+  if pos == "left" or pos == "right" then
+    vim.api.nvim_win_set_width(state.win_id, size)
+  else -- top or bottom
+    vim.api.nvim_win_set_height(state.win_id, size)
+  end
+  
   vim.api.nvim_buf_set_keymap(state.buf_nr, 't', '<Esc>', [[<C-\><C-n>]], {noremap=true, silent=true})
   if enter_insert then vim.cmd('startinsert') end
   return current_win
@@ -248,7 +277,7 @@ function M.start(args_override)
       vim.api.nvim_buf_call(buf, function()
         state.job_id = vim.fn.jobstart(args, {
           term = true,
-          width = get_terminal_width(),
+          width = get_window_size(),
           cwd = vim.fn.getcwd(),
           on_stdout = function(_, data, _)
             handle_stdout_prompt(data)

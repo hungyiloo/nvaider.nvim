@@ -49,6 +49,13 @@ require("lazy").setup({
         ollama = { "--model", "ollama/qwen2.5-coder:32b" },
         minimal = {}
       },
+
+      -- Window positioning and sizing
+      window = {
+        position = "right",  -- "top", "bottom", "left", "right"
+        width = 0.35,        -- for left/right positions (fraction of total width)
+        height = 0.3,        -- for top/bottom positions (fraction of total height)
+      },
     },
 
     -- These are just suggested key mappings. Feel free to ignore.
@@ -169,6 +176,15 @@ Advanced operations:
 | ---------- | ------ | -------------------------- | ------------------------------------------- |
 | `cmd`      | string | `"aider"`                  | The command or executable for aider.       |
 | `profiles` | table  | `{ default = {} }`         | Named profiles with different argument sets.|
+| `window`   | table  | See below                  | Window positioning and sizing options.      |
+
+### Window Configuration
+
+| Option       | Type   | Default   | Description                                           |
+| ------------ | ------ | --------- | ----------------------------------------------------- |
+| `position`   | string | `"right"` | Window position: `"top"`, `"bottom"`, `"left"`, `"right"` |
+| `width`      | number | `0.35`    | Window width as fraction of total width (for left/right positions) |
+| `height`     | number | `0.3`     | Window height as fraction of total height (for top/bottom positions) |
 
 
 Profiles let you define different aider configurations for different workflows:
@@ -187,8 +203,30 @@ opts = {
     
     -- Minimal setup
     basic = {},
+  },
+
+  -- Configure window positioning and sizing
+  window = {
+    position = "bottom",  -- Open aider terminal at bottom of screen
+    height = 0.4,         -- Use 40% of screen height
   }
 }
+```
+
+### Window Positioning Examples
+
+```lua
+-- Right side (default)
+window = { position = "right", width = 0.35 }
+
+-- Left side with narrower width
+window = { position = "left", width = 0.25 }
+
+-- Bottom with more height
+window = { position = "bottom", height = 0.4 }
+
+-- Top with compact height
+window = { position = "top", height = 0.2 }
 ```
 
 ## Tips and Tricks
