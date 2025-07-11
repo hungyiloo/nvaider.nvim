@@ -1,8 +1,6 @@
 local M = {
   cmd = "aider",
-  profiles = {
-    default = {},
-  },
+  profiles = {},
   window = {
     position = "right", -- "top", "bottom", "left", "right"
     width = 0.35,       -- for left/right positions (fraction of total width)
